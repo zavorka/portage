@@ -13,9 +13,11 @@ case ${PV} in
 		EGIT_REPO_URI="git://github.com/jbeder/${PN}"
 		EGIT_BRANCH="master"
 		inherit git-r3
+		S="${WORKDIR}/${PN}-${PV}"
 		;;
 	*)
 		SRC_URI="https://github.com/jbeder/${PN}/archive/release-${PV}.tar.gz"
+		S="${WORKDIR}/${PN}-release-${PV}"
 		;;
 esac
 
@@ -26,7 +28,6 @@ IUSE=""
 DEPEND=""
 RDEPEND="${DEPEND}"
 
-S="${WORKDIR}/${PN}-release-${PV}"
 
 src_prepare() {
 	sed -i \
@@ -38,7 +39,11 @@ src_prepare() {
 
 src_configure() {
 	local mycmakeargs=(
-		-DBUILD_SHARED_LIBS=ON
+		-DBUILD_SHARED_LIBS=OFF -DYAML_CPP_BUILD_TESTS=OFF
 	)
 	cmake-utils_src_configure
+}
+
+src_install() {
+	cmake-utils_src_install
 }

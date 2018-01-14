@@ -1,0 +1,80 @@
+diff --git a/gettext-tools/configure.ac b/gettext-tools/configure.ac
+index 3b132ed..536569b 100644
+--- a/gettext-tools/configure.ac
++++ b/gettext-tools/configure.ac
+@@ -126,31 +126,8 @@ BISON_I18N
+ dnl Test whether msgmerge must be linked against libm. This is the case on
+ dnl most systems; but BeOS has all <math.h> functions in libc and doesn't have
+ dnl a libm.
+-MSGMERGE_LIBM=?
+-AC_TRY_LINK([
+-   #ifndef __NO_MATH_INLINES
+-   # define __NO_MATH_INLINES 1 /* for glibc */
+-   #endif
+-   #include <math.h>
+-   double x;],
+-  [x = ceil(x); x = sqrt(x);],
+-  [MSGMERGE_LIBM=])
+-if test "$MSGMERGE_LIBM" = "?"; then
+-  save_LIBS="$LIBS" 
+-  LIBS="$LIBS -lm"
+-  AC_TRY_LINK([
+-     #ifndef __NO_MATH_INLINES
+-     # define __NO_MATH_INLINES 1 /* for glibc */
+-     #endif
+-     #include <math.h>
+-     double x;],
+-    [x = ceil(x); x = sqrt(x);],
+-    [MSGMERGE_LIBM="-lm"])
+-  LIBS="$save_LIBS"
+-fi
+-if test "$MSGMERGE_LIBM" = "?"; then
+-  MSGMERGE_LIBM=
+-fi
++LIBS="$LIBS -lm"
++MSGMERGE_LIBM="-lm"
+ AC_SUBST([MSGMERGE_LIBM])
+ 
+ dnl Checks for header files, functions and declarations.
+diff --git a/gettext-tools/libgettextpo/Makefile.am b/gettext-tools/libgettextpo/Makefile.am
+index 36bd700..783c257 100644
+--- a/gettext-tools/libgettextpo/Makefile.am
++++ b/gettext-tools/libgettextpo/Makefile.am
+@@ -109,7 +109,7 @@ libgettextpo_la_LIBADD = libgnu.la $(WOE32_LIBADD) $(LTLIBUNISTRING)
+ libgettextpo_la_LDFLAGS = \
+   -version-info $(LTV_CURRENT):$(LTV_REVISION):$(LTV_AGE) \
+   -rpath $(libdir) \
+-  @LTLIBINTL@ @LTLIBICONV@ -lc -no-undefined
++  @LTLIBINTL@ @LTLIBICONV@ -lc -lm -no-undefined
+ 
+ # Tell the mingw or Cygwin linker which symbols to export.
+ if WOE32DLL
+diff --git a/gettext-tools/src/Makefile.am b/gettext-tools/src/Makefile.am
+index 0538d1e..b72f024 100644
+--- a/gettext-tools/src/Makefile.am
++++ b/gettext-tools/src/Makefile.am
+@@ -253,7 +253,7 @@ cldr_plurals_LDADD = libgettextsrc.la $(LDADD)
+ # use iconv().
+ libgettextsrc_la_LDFLAGS = \
+   -release @VERSION@ \
+-  ../gnulib-lib/libgettextlib.la $(LTLIBUNISTRING) @LTLIBINTL@ @LTLIBICONV@ -lc -no-undefined
++  ../gnulib-lib/libgettextlib.la $(LTLIBUNISTRING) @LTLIBINTL@ @LTLIBICONV@ -lc -lm -no-undefined
+ 
+ # OS/2 does not support a DLL name longer than 8 characters.
+ if OS2
+diff --git a/gettext-tools/src/Makefile.am b/gettext-tools/src/Makefile.am
+index 0538d1e..e7f36f9 100644
+--- a/gettext-tools/src/Makefile.am
++++ b/gettext-tools/src/Makefile.am
+@@ -285,9 +285,9 @@ msgmerge_CXXFLAGS = $(AM_CXXFLAGS) $(OPENMP_CFLAGS)
+ # INTL_MACOSX_LIBS is needed because the programs depend on libintl.la
+ # but libtool doesn't put -Wl,-framework options into .la files.
+ # For msginit, it is also needed because of localename.c.
+-msgcmp_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ @MSGMERGE_LIBM@ $(WOE32_LDADD)
++msgcmp_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ -lm $(WOE32_LDADD)
+ msgfmt_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
+-msgmerge_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ @MSGMERGE_LIBM@ $(WOE32_LDADD) $(OPENMP_CFLAGS)
++msgmerge_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ -lm $(WOE32_LDADD) $(OPENMP_CFLAGS)
+ msgunfmt_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
+ xgettext_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ @LTLIBICONV@ $(WOE32_LDADD)
+ msgattrib_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)

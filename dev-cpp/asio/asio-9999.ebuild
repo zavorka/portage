@@ -4,6 +4,8 @@
 
 EAPI=6
 
+inherit autotools
+
 DESCRIPTION="Asynchronous Network Library"
 HOMEPAGE="http://asio.sourceforge.net/"
 case ${PV} in
@@ -27,9 +29,16 @@ RDEPEND="ssl? (
 	libressl? ( >=dev-libs/libressl-2.5.0 )
 )"
 DEPEND="${RDEPEND}"
+S="${S}/asio"
 
 src_prepare() {
 	default
+	eautoreconf
+}
+
+src_configure() {
+	econf \
+		--with-boost=no
 
 	if ! use test; then
 		# Don't build nor install any examples or unittests
@@ -45,7 +54,7 @@ src_prepare() {
 }
 
 src_install() {
-	use doc && local HTML_DOCS=( doc/. )
+	use doc && local HTML_DOCS=( src/doc/. )
 	default
 
 	if use examples; then
