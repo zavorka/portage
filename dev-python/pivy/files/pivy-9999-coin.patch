@@ -1,0 +1,51 @@
+diff --git a/setup.py b/setup.py
+index 4094495..603dfa5 100755
+--- a/setup.py
++++ b/setup.py
+@@ -339,36 +339,17 @@ class pivy_build(build):
+         '''
+         set the global variable SWIG_COND_SYMBOLS needed for conditional wrapping
+         '''
+-        print(yellow('\ncoin-features are not supported in this version'))
+-        return #TODO
+-
+-        if sys.platform == "win32":
+-            return
+         print(blue("Checking for Coin features..."))
+-        if not os.system("coin-config --have-feature 3ds_import"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_3DS_IMPORT")
+-            print(green("3ds import "))
+-
+-        if not os.system("coin-config --have-feature vrml97"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_VRML97")
+-            print(green("vrml97 "))
+-
+-        if not os.system("coin-config --have-feature sound"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_SOUND")
+-            print(green("sound "))
+-
+-        if not os.system("coin-config --have-feature superglu"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_SUPERGLUE")
+-            print(green("superglu "))
+-
+-        if not os.system("coin-config --have-feature threads"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_THREADS")
+-            print(green("threads "))
+-
+-        if not os.system("coin-config --have-feature threadsafe"):
+-            self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_THREADSAFE")
+-            print(green("threadsafe "))
+-
++        self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_3DS_IMPORT")
++        print(green("3ds import "))
++        self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_VRML97")
++        print(green("vrml97 "))
++        self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_SOUND")
++        print(green("sound "))
++        self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_THREADS")
++        print(green("threads "))
++        self.SWIG_COND_SYMBOLS.append("-DHAVE_FEATURE_THREADSAFE")
++        print(green("threadsafe "))
+         print()
+ 
+     def check_swig_version(self, swig):

@@ -39,7 +39,7 @@ src_prepare() {
 
 src_configure() {
 	local mycmakeargs=(
-		-DBUILD_SHARED_LIBS=OFF -DYAML_CPP_BUILD_TESTS=OFF
+		-DBUILD_SHARED_LIBS=ON -DYAML_CPP_BUILD_TESTS=OFF
 	)
 	cmake-utils_src_configure
 }

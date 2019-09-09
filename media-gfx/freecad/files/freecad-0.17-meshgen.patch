@@ -1,0 +1,14 @@
+diff --git a/src/Mod/MeshPart/App/Mesher.cpp b/src/Mod/MeshPart/App/Mesher.cpp
+index 5c181ca..9d2a83a 100644
+--- a/src/Mod/MeshPart/App/Mesher.cpp
++++ b/src/Mod/MeshPart/App/Mesher.cpp
+@@ -311,7 +311,8 @@ Mesh::MeshObject* Mesher::createMesh() const
+ #else
+     std::list<SMESH_Hypothesis*> hypoth;
+ 
+-    SMESH_Gen* meshgen = SMESH_Gen::get();
++    SMESH_Gen mesh_gen = SMESH_Gen();
++    SMESH_Gen meshgen = &mesh_gen;
+     SMESH_Mesh* mesh = meshgen->CreateMesh(0, true);
+     int hyp=0;
+ 

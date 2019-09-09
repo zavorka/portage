@@ -1,0 +1,23 @@
+diff --git a/cmake/FindQwt6.cmake b/cmake/FindQwt6.cmake
+index 1ac5b75..d47b003 100644
+--- a/cmake/FindQwt6.cmake
++++ b/cmake/FindQwt6.cmake
+@@ -47,8 +47,7 @@ pkg_search_module( PKG_QWT QUIET qwt>=6.0.0 Qt5Qwt6>=6.0.0 )
+ 
+ find_path ( QWT_INCLUDE_DIR
+   NAMES qwt_plot.h
+-  HINTS ${PKG_QWT_INCLUDEDIR} ${QT_INCLUDE_DIR}
+-  PATH_SUFFIXES qwt qwt-qt3 qwt-qt4 qwt-qt5
++  PATH_SUFFIXES qwt qwt6 qwt-qt3 qwt-qt4 qwt-qt5
+   )
+ 
+ set ( QWT_INCLUDE_DIRS ${QWT_INCLUDE_DIR} )
+@@ -82,7 +81,7 @@ endif ()
+ 
+ 
+ find_library ( QWT_LIBRARY
+-  NAMES qwt qwt-qt3 qwt-qt4 qwt-qt5
++  NAMES qwt qwt-qt3 qwt-qt4 qwt-qt5 qwt6 qwt6-qt5
+   )
+ 
+ set ( QWT_LIBRARIES ${QWT_LIBRARY} )

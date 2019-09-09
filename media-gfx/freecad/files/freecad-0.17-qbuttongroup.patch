@@ -1,0 +1,26 @@
+diff --git a/src/Mod/Part/Gui/DlgSettingsGeneral.cpp b/src/Mod/Part/Gui/DlgSettingsGeneral.cpp
+index d0cf0f9..95667e4 100644
+--- a/src/Mod/Part/Gui/DlgSettingsGeneral.cpp
++++ b/src/Mod/Part/Gui/DlgSettingsGeneral.cpp
+@@ -22,6 +22,9 @@
+ 
+ 
+ #include "PreCompiled.h"
++#ifndef _PreComp_
++#include <QButtonGroup>
++#endif
+ 
+ #include <Interface_Static.hxx>
+ 
+diff --git a/src/Mod/PartDesign/Gui/TaskDraftParameters.cpp b/src/Mod/PartDesign/Gui/TaskDraftParameters.cpp
+index 556fc92..571893c 100644
+--- a/src/Mod/PartDesign/Gui/TaskDraftParameters.cpp
++++ b/src/Mod/PartDesign/Gui/TaskDraftParameters.cpp
+@@ -25,6 +25,7 @@
+ 
+ #ifndef _PreComp_
+ # include <QMessageBox>
++# include <QAction>
+ #endif
+ 
+ #include "ui_TaskDraftParameters.h"

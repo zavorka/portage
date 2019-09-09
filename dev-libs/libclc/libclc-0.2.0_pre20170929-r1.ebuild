@@ -32,22 +32,11 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm64 x86"
 IUSE=""
 
-RDEPEND="
-	|| (
-		sys-devel/clang:7
-		sys-devel/clang:6
-		sys-devel/clang:5
-		sys-devel/clang:4
-		>=sys-devel/clang-3.9:0
-	)"
+RDEPEND="sys-devel/clang:7"
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}"
 
-LLVM_MAX_SLOT=6
-
-llvm_check_deps() {
-	has_version "sys-devel/clang:${LLVM_SLOT}"
-}
+LLVM_MAX_SLOT=7
 
 pkg_setup() {
 	# we do not need llvm_pkg_setup
@@ -57,7 +46,7 @@ pkg_setup() {
 src_configure() {
 	./configure.py \
 		--with-cxx-compiler="$(tc-getCXX)" \
-		--with-llvm-config="$(get_llvm_prefix "${LLVM_MAX_SLOT}")/bin/llvm-config" \
+		--with-llvm-config="$(get_llvm_prefix "7")/bin/llvm-config" \
 		--prefix="${EPREFIX}/usr" || die
 }
 

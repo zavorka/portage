@@ -1,0 +1,28 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4805281..aef3a0f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -146,11 +146,19 @@ else(WIN32)
+     SET(CMAKE_INSTALL_PREFIX "/usr/lib${LIB_SUFFIX}/freecad" CACHE PATH "Installation root directory")
+ endif(WIN32)
+ 
+-SET(CMAKE_INSTALL_DATADIR data CACHE PATH "Output directory for data and resource files")
+-SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for header files")
+-SET(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Output directory for documentation and license files")
++if(NOT CMAKE_INSTALL_DATADIR)
++	SET(CMAKE_INSTALL_DATADIR data CACHE PATH "Output directory for data and resource files")
++endif(NOT CMAKE_INSTALL_DATADIR)
++if(NOT CMAKE_INSTALL_INCLUDEDIR)
++	SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for header files")
++endif(NOT CMAKE_INSTALL_INCLUDEDIR)
++if(NOT CMAKE_INSTALL_DOCDIR)
++	SET(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Output directory for documentation and license files")
++endif(NOT CMAKE_INSTALL_DOCDIR)
+ # Don't set it without manual adaption of LibDir variable in src/App/FreeCADInit.py
+-SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
++if(NOT CMAKE_INSTALL_LIBDIR)
++	SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
++endif(NOT CMAKE_INSTALL_LIBDIR)
+ 
+ if(NOT WIN32)
+     if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})

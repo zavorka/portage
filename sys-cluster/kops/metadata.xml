@@ -1,0 +1,9 @@
+<pkgmetadata>
+<maintainer type="person">
+<email>qshou@halfmu.net</email>
+<name>Qing Shou</name>
+</maintainer>
+<upstream>
+<remote-id type="github">kubernetes/kops</remote-id>
+</upstream>
+</pkgmetadata>

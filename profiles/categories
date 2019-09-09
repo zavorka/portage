@@ -16,3 +16,4 @@ cross-arm-none-newlib
 cross-arm-hardfloat-none-newlib
 cross-x86_64-pc-linux-musl
 cross-x86_64-pc-none-musl
+cross-avr

@@ -1,0 +1,14 @@
+diff --git a/soqt/CMakeLists.txt b/soqt/CMakeLists.txt
+index 3998da3..f1eaa4c 100644
+--- a/soqt/CMakeLists.txt
++++ b/soqt/CMakeLists.txt
+@@ -217,9 +217,6 @@ set(PACKAGE_REQUIREMENTS "Coin")
+ 
+ configure_file(src/config.h.cmake.in src/config.h)
+ 
+-add_subdirectory(data)
+-add_subdirectory(src/Inventor/${Gui}/common)
+-
+ file(GLOB_RECURSE COMMON_HDRS ${CMAKE_BINARY_DIR}/src/*.h)
+ file(GLOB_RECURSE COMMON_SRCS ${CMAKE_BINARY_DIR}/src/*.cpp)
+ 

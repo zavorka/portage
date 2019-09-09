@@ -1,0 +1,42 @@
+diff --git a/xs/CMakeLists.txt b/xs/CMakeLists.txt
+index 77747cd..156e126 100644
+--- a/xs/CMakeLists.txt
++++ b/xs/CMakeLists.txt
+@@ -634,24 +634,6 @@ if (NOT GLEW_FOUND)
+ endif ()
+ include_directories(${GLEW_INCLUDE_DIRS})
+ target_link_libraries(XS ${GLEW_LIBRARIES})
+-# Install the XS.pm and XS.{so,dll,bundle} into the local-lib directory.
+-set(PERL_LOCAL_LIB_DIR "${PROJECT_SOURCE_DIR}/local-lib/lib/perl5/${PerlEmbed_ARCHNAME}")
+-add_custom_command(
+-    TARGET XS
+-    POST_BUILD
+-        COMMAND ${CMAKE_COMMAND} -E make_directory "${PERL_LOCAL_LIB_DIR}/auto/Slic3r/XS/"
+-        COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:XS>" "${PERL_LOCAL_LIB_DIR}/auto/Slic3r/XS/"
+-        COMMAND ${CMAKE_COMMAND} -E make_directory "${PERL_LOCAL_LIB_DIR}/Slic3r/"
+-        COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/xs/lib/Slic3r/XS.pm" "${PERL_LOCAL_LIB_DIR}/Slic3r/"
+-    COMMENT "Installing XS.pm and XS.{so,dll,bundle} into the local-lib directory ..."
+-)
+-if(APPLE)
+-    add_custom_command(
+-        TARGET XS
+-        POST_BUILD
+-            COMMAND ${CMAKE_COMMAND} -E rename "${PERL_LOCAL_LIB_DIR}/auto/Slic3r/XS/XS" "${PERL_LOCAL_LIB_DIR}/auto/Slic3r/XS/XS.bundle"
+-    )
+-endif()
+ 
+ # Create a slic3r executable
+ add_executable(slic3r ${PROJECT_SOURCE_DIR}/src/slic3r.cpp)
+diff --git a/xs/CMakeLists.txt b/xs/CMakeLists.txt
+index 367fa9a..0774a48 100644
+--- a/xs/CMakeLists.txt
++++ b/xs/CMakeLists.txt
+@@ -726,7 +726,7 @@ add_custom_target(pot
+ # Adding libnest2d project for bin packing...
+ # ##############################################################################
+ 
+-set(LIBNEST2D_UNITTESTS ON CACHE BOOL "Force generating unittests for libnest2d")
++set(LIBNEST2D_UNITTESTS OFF CACHE BOOL "Force generating unittests for libnest2d")
+ 
+ add_subdirectory(${LIBDIR}/libnest2d)
+ target_compile_definitions(libslic3r PUBLIC -DUSE_TBB)

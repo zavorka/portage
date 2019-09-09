@@ -1,0 +1,44 @@
+# Copyright 1999-2017 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+EAPI=5
+
+inherit cmake-utils mercurial
+
+DESCRIPTION="The glue between Coin3D and Qt"
+HOMEPAGE="https://bitbucket.org/Coin3D/soqt"
+EHG_REPO_URI="https://bitbucket.org/Coin3D/soqt"
+EHG_CLONE_CMD="hg clone ${EHG_QUIET_CMD_OPT}"
+EHG_CHECKOUT_DIR="${WORKDIR}/soqt"
+LICENSE="|| ( GPL-2 PEL )"
+KEYWORDS="~amd64 ~arm ~x86 ~amd64-linux ~x86-linux"
+SLOT="0"
+IUSE="debug doc static-libs"
+
+RDEPEND="
+	>=media-libs/coin-3.1.3
+	virtual/opengl
+	dev-qt/qtcore:5
+	dev-qt/qtgui:5
+	dev-qt/qtopengl:5
+"
+DEPEND="${RDEPEND}
+	virtual/pkgconfig
+	doc? ( app-doc/doxygen )
+"
+
+S=${WORKDIR}/soqt
+
+PATCHES=(
+	"${FILESDIR}/${PN}-1.6.0-doxygen.patch"
+	"${FILESDIR}/${PN}-1.6.0-pkgconfig-partial.patch"
+)
+
+DOCS=(AUTHORS ChangeLog FAQ HACKING NEWS README)
+
+src_install() {
+	# Remove SoQt from Libs.private
+	#sed -e '/Libs.private/s/ -lSoQt//' -i "${BUILD_DIR}"/SoQt.pc || die
+
+	cmake-utils_src_install
+}

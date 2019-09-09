@@ -1,0 +1,267 @@
+diff --git a/src/libs/ssh/ssh.qbs b/src/libs/ssh/ssh.qbs
+index 3aa95a1..1b54b5e 100644
+--- a/src/libs/ssh/ssh.qbs
++++ b/src/libs/ssh/ssh.qbs
+@@ -60,13 +60,13 @@ Project {
+         property var botanIncludes: {
+             var result = ["../3rdparty"];
+             if (useSystemBotan)
+-                result.push("/usr/include/botan-1.10")
++                result.push("/usr/include/botan-2")
+             return result
+         }
+         property var botanLibs: {
+             var result = [];
+             if (useSystemBotan)
+-                result.push("botan-1.10")
++                result.push("botan-2")
+             if (qbs.targetOS.contains("windows"))
+                 result.push("advapi32", "user32")
+             else if (qbs.targetOS.contains("linux"))
+diff --git a/src/libs/ssh/sshbotanconversions_p.h b/src/libs/ssh/sshbotanconversions_p.h
+index f54ca84..be6fd68 100644
+--- a/src/libs/ssh/sshbotanconversions_p.h
++++ b/src/libs/ssh/sshbotanconversions_p.h
+@@ -45,7 +45,12 @@ inline Botan::byte *convertByteArray(QByteArray &a)
+ 
+ inline QByteArray convertByteArray(const Botan::SecureVector<Botan::byte> &v)
+ {
+-    return QByteArray(reinterpret_cast<const char *>(v.begin()), static_cast<int>(v.size()));
++    return QByteArray(reinterpret_cast<const char *>(&v.front()), static_cast<int>(v.size()));
++}
++
++inline QByteArray convertByteArray(const std::vector<std::uint8_t> &v)
++{
++    return QByteArray(reinterpret_cast<const char *>(&v.front()), static_cast<int>(v.size()));
+ }
+ 
+ inline const char *botanKeyExchangeAlgoName(const QByteArray &rfcAlgoName)
+@@ -91,11 +96,11 @@ inline const char *botanEmsaAlgoName(const QByteArray &rfcAlgoName)
+     if (rfcAlgoName == SshCapabilities::PubKeyRsa)
+         return "EMSA3(SHA-1)";
+     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa256)
+-        return "EMSA1_BSI(SHA-256)";
++        return "EMSA1(SHA-256)";
+     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa384)
+-        return "EMSA1_BSI(SHA-384)";
++        return "EMSA1(SHA-384)";
+     if (rfcAlgoName == SshCapabilities::PubKeyEcdsa521)
+-        return "EMSA1_BSI(SHA-512)";
++        return "EMSA1(SHA-512)";
+     throw SshClientException(SshInternalError, SSH_TR("Unexpected host key algorithm \"%1\"")
+                              .arg(QString::fromLatin1(rfcAlgoName)));
+ }
+diff --git a/src/libs/ssh/sshcryptofacility.cpp b/src/libs/ssh/sshcryptofacility.cpp
+index 7156fd8..136a016 100644
+--- a/src/libs/ssh/sshcryptofacility.cpp
++++ b/src/libs/ssh/sshcryptofacility.cpp
+@@ -77,11 +77,10 @@ void SshAbstractCryptoFacility::recreateKeys(const SshKeyExchange &kex)
+ 
+     if (m_sessionId.isEmpty())
+         m_sessionId = kex.h();
+-    Algorithm_Factory &af = global_state().algorithm_factory();
++    // Algorithm_Factory &af = global_state().algorithm_factory();
+     const QByteArray &rfcCryptAlgoName = cryptAlgoName(kex);
+-    BlockCipher * const cipher
+-            = af.prototype_block_cipher(botanCryptAlgoName(rfcCryptAlgoName))->clone();
+-
++    std::unique_ptr<BlockCipher> cipher
++            = BlockCipher::create_or_throw(botanCryptAlgoName(rfcCryptAlgoName));
+     m_cipherBlockSize = static_cast<quint32>(cipher->block_size());
+     const QByteArray ivData = generateHash(kex, ivChar(), m_cipherBlockSize);
+     const InitializationVector iv(convertByteArray(ivData), m_cipherBlockSize);
+@@ -90,15 +89,15 @@ void SshAbstractCryptoFacility::recreateKeys(const SshKeyExchange &kex)
+     const QByteArray cryptKeyData = generateHash(kex, keyChar(), keySize);
+     SymmetricKey cryptKey(convertByteArray(cryptKeyData), keySize);
+     Keyed_Filter * const cipherMode
+-            = makeCipherMode(cipher, getMode(rfcCryptAlgoName), iv, cryptKey);
++            = makeCipherMode(cipher.release(), getMode(rfcCryptAlgoName), iv, cryptKey);
+     m_pipe.reset(new Pipe(cipherMode));
+ 
+     m_macLength = botanHMacKeyLen(hMacAlgoName(kex));
+     const QByteArray hMacKeyData = generateHash(kex, macChar(), macLength());
+     SymmetricKey hMacKey(convertByteArray(hMacKeyData), macLength());
+-    const HashFunction * const hMacProto
+-        = af.prototype_hash_function(botanHMacAlgoName(hMacAlgoName(kex)));
+-    m_hMac.reset(new HMAC(hMacProto->clone()));
++    std::unique_ptr<HashFunction> hMacProto
++        = HashFunction::create_or_throw(botanHMacAlgoName(hMacAlgoName(kex)));
++    m_hMac.reset(new HMAC(hMacProto.release()));
+     m_hMac->set_key(hMacKey);
+ }
+ 
+@@ -156,12 +155,12 @@ QByteArray SshAbstractCryptoFacility::generateHash(const SshKeyExchange &kex,
+         = kex.hash()->process(convertByteArray(data), data.size());
+     while (key.size() < length) {
+         SecureVector<byte> tmpKey;
+-        tmpKey += SecureVector<byte>(convertByteArray(k), k.size());
+-        tmpKey += SecureVector<byte>(convertByteArray(h), h.size());
++        tmpKey.insert(tmpKey.end(), k.cbegin(), k.cend());
++        tmpKey.insert(tmpKey.end(), h.cbegin(), h.cend());
+         tmpKey += key;
+         key += kex.hash()->process(tmpKey);
+     }
+-    return QByteArray(reinterpret_cast<const char *>(key.begin()), length);
++    return QByteArray(reinterpret_cast<const char *>(&key.front()), length);
+ }
+ 
+ void SshAbstractCryptoFacility::checkInvariant() const
+@@ -192,7 +191,7 @@ Keyed_Filter *SshEncryptionFacility::makeCipherMode(BlockCipher *cipher, Mode mo
+ {
+     switch (mode) {
+     case CbcMode:
+-        return new CBC_Encryption(cipher, new Null_Padding, key, iv);
++        return get_cipher("CBC", key, iv, ENCRYPTION);
+     case CtrMode:
+         return makeCtrCipherMode(cipher, iv, key);
+     }
+@@ -249,7 +248,7 @@ bool SshEncryptionFacility::createAuthenticationKeyFromPKCS8(const QByteArray &p
+     try {
+         Pipe pipe;
+         pipe.process_msg(convertByteArray(privKeyFileContents), privKeyFileContents.size());
+-        m_authKey.reset(PKCS8::load_key(pipe, m_rng, SshKeyPasswordRetriever()));
++        m_authKey.reset(PKCS8::load_key(pipe, m_rng, &get_passphrase));
+         if (auto * const dsaKey = dynamic_cast<DSA_PrivateKey *>(m_authKey.data())) {
+             m_authKeyAlgoName = SshCapabilities::PubKeyDss;
+             pubKeyParams << dsaKey->group_p() << dsaKey->group_q()
+@@ -338,7 +337,7 @@ bool SshEncryptionFacility::createAuthenticationKeyFromOpenSSL(const QByteArray
+         } else if (m_authKeyAlgoName == SshCapabilities::PubKeyRsa) {
+             BigInt p, q, e, d, n;
+             sequence.decode(n).decode(e).decode(d).decode(p).decode(q);
+-            RSA_PrivateKey * const rsaKey = new RSA_PrivateKey(m_rng, p, q, e, d, n);
++            RSA_PrivateKey * const rsaKey = new RSA_PrivateKey(p, q, e, d, n);
+             m_authKey.reset(rsaKey);
+             pubKeyParams << e << n;
+             allKeyParams << pubKeyParams << p << q << d;
+@@ -417,7 +416,7 @@ Keyed_Filter *SshDecryptionFacility::makeCipherMode(BlockCipher *cipher, Mode mo
+ {
+     switch (mode) {
+     case CbcMode:
+-        return new CBC_Decryption(cipher, new Null_Padding, key, iv);
++        return get_cipher("CBC", iv, key, DECRYPTION);
+     case CtrMode:
+         return makeCtrCipherMode(cipher, iv, key);
+     }
+diff --git a/src/libs/ssh/sshkeyexchange.cpp b/src/libs/ssh/sshkeyexchange.cpp
+index f513454..22fc526 100644
+--- a/src/libs/ssh/sshkeyexchange.cpp
++++ b/src/libs/ssh/sshkeyexchange.cpp
+@@ -148,12 +148,13 @@ void SshKeyExchange::sendNewKeysPacket(const SshIncomingPacket &dhReply,
+     printData("K_S", reply.k_s);
+ 
+     SecureVector<byte> encodedK;
++    Botan::AutoSeeded_RNG rng;
+     if (m_dhKey) {
+         concatenatedData += AbstractSshPacket::encodeMpInt(m_dhKey->get_y());
+         concatenatedData += AbstractSshPacket::encodeMpInt(reply.f);
+-        DH_KA_Operation dhOp(*m_dhKey);
+-        SecureVector<byte> encodedF = BigInt::encode(reply.f);
+-        encodedK = dhOp.agree(encodedF, encodedF.size());
++        Botan::PK_Key_Agreement dhOp(*m_dhKey, rng, "Raw");
++        std::vector<std::uint8_t> encodedF = BigInt::encode(reply.f);
++        encodedK = dhOp.derive_key(m_dhKey->group_p().bytes(), encodedF).bits_of();
+         printData("y", AbstractSshPacket::encodeMpInt(m_dhKey->get_y()));
+         printData("f", AbstractSshPacket::encodeMpInt(reply.f));
+         m_dhKey.reset(nullptr);
+@@ -162,8 +163,8 @@ void SshKeyExchange::sendNewKeysPacket(const SshIncomingPacket &dhReply,
+         concatenatedData // Q_C.
+                 += AbstractSshPacket::encodeString(convertByteArray(m_ecdhKey->public_value()));
+         concatenatedData += AbstractSshPacket::encodeString(reply.q_s);
+-        ECDH_KA_Operation ecdhOp(*m_ecdhKey);
+-        encodedK = ecdhOp.agree(convertByteArray(reply.q_s), reply.q_s.count());
++        Botan::PK_Key_Agreement ecdhOp(*m_ecdhKey, rng, "Raw");
++        encodedK = ecdhOp.derive_key(m_ecdhKey->domain().get_curve().get_p().bytes(), convertByteArray(reply.q_s), reply.q_s.count()).bits_of();
+         m_ecdhKey.reset(nullptr);
+     }
+ 
+diff --git a/src/libs/ssh/sshkeypasswordretriever.cpp b/src/libs/ssh/sshkeypasswordretriever.cpp
+index 8f13362..6631404 100644
+--- a/src/libs/ssh/sshkeypasswordretriever.cpp
++++ b/src/libs/ssh/sshkeypasswordretriever.cpp
+@@ -34,20 +34,16 @@
+ namespace QSsh {
+ namespace Internal {
+ 
+-std::string SshKeyPasswordRetriever::get_passphrase(const std::string &, const std::string &,
+-    UI_Result &result) const
++std::string get_passphrase()
+ {
+     const bool hasGui = dynamic_cast<QApplication *>(QApplication::instance());
+     if (hasGui) {
+-        bool ok;
+         const QString &password = QInputDialog::getText(0,
+             QCoreApplication::translate("QSsh::Ssh", "Password Required"),
+             QCoreApplication::translate("QSsh::Ssh", "Please enter the password for your private key."),
+-            QLineEdit::Password, QString(), &ok);
+-        result = ok ? OK : CANCEL_ACTION;
++            QLineEdit::Password, QString());
+         return std::string(password.toLocal8Bit().data());
+     } else {
+-        result = OK;
+         std::string password;
+         std::cout << "Please enter the password for your private key (set echo off beforehand!): " << std::flush;
+         std::cin >> password;
+diff --git a/src/libs/ssh/sshkeypasswordretriever_p.h b/src/libs/ssh/sshkeypasswordretriever_p.h
+index 15301fe..cb6c4ea 100644
+--- a/src/libs/ssh/sshkeypasswordretriever_p.h
++++ b/src/libs/ssh/sshkeypasswordretriever_p.h
+@@ -32,12 +32,7 @@
+ namespace QSsh {
+ namespace Internal {
+ 
+-class SshKeyPasswordRetriever : public Botan::User_Interface
+-{
+-public:
+-    std::string get_passphrase(const std::string &what, const std::string &source,
+-        UI_Result &result) const;
+-};
++std::string get_passphrase();
+ 
+ } // namespace Internal
+ } // namespace QSsh
+diff --git a/src/libs/3rdparty/botan/botan.pri b/src/libs/3rdparty/botan/botan.pri
+index abf66bf..cac6e3a 100644
+--- a/src/libs/3rdparty/botan/botan.pri
++++ b/src/libs/3rdparty/botan/botan.pri
+@@ -4,7 +4,7 @@ HEADERS += $$PWD/botan.h
+ equals(USE_SYSTEM_BOTAN, 1) {
+     DEFINES += USE_SYSTEM_BOTAN
+     CONFIG += link_pkgconfig
+-    PKGCONFIG += botan-1.10
++    PKGCONFIG += botan-2
+ } else {
+ 
+ SOURCES += $$PWD/botan.cpp
+diff --git a/src/libs/3rdparty/botan/botan.h b/src/libs/3rdparty/botan/botan.h
+index d7b90cc..78cff7c 100644
+--- a/src/libs/3rdparty/botan/botan.h
++++ b/src/libs/3rdparty/botan/botan.h
+@@ -10,6 +10,7 @@
+ 
+ #ifdef USE_SYSTEM_BOTAN
+ #include <botan/auto_rng.h>
++#include <botan/ber_dec.h>
+ #include <botan/cbc.h>
+ #include <botan/ctr.h>
+ #include <botan/der_enc.h>
+@@ -19,13 +20,19 @@
+ #include <botan/ec_group.h>
+ #include <botan/ecdh.h>
+ #include <botan/ecdsa.h>
++#include <botan/filters.h>
+ #include <botan/hmac.h>
+ #include <botan/init.h>
++#include <botan/key_filt.h>
+ #include <botan/lookup.h>
++#include <botan/numthry.h>
+ #include <botan/pem.h>
++#include <botan/pipe.h>
++#include <botan/pk_ops.h>
++#include <botan/pkcs8.h>
+ #include <botan/pubkey.h>
+ #include <botan/rsa.h>
+-#include <botan/ui.h>
++#include <botan/x509_key.h>
+ #else
+ 
+ #include <QtGlobal>

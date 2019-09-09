@@ -1,0 +1,81 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2c17a4f..d943d55 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,6 +6,7 @@ PROJECT(MEDFile C CXX)
+ ## See http://www.cmake.org/Bug/view.php?id=10227
+ #ENABLE_LANGUAGE(Fortran OPTIONAL)
+ 
++INCLUDE(GNUInstallDirs)
+ INCLUDE(CheckLanguage)
+ CHECK_LANGUAGE(Fortran)
+ IF(CMAKE_Fortran_COMPILER)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index b208270..e34f52d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -83,7 +83,7 @@ IF(MEDFILE_BUILD_SHARED_LIBS)
+   TARGET_LINK_LIBRARIES(medC ${HDF5_LIBS} ${MPI_LIBS})
+   MED_SET_DEFINITIONS(medC NOGDI)
+   
+-  INSTALL(TARGETS medC EXPORT ${_export_group} DESTINATION lib)  
++  INSTALL(TARGETS medC EXPORT ${_export_group} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ ENDIF()
+ 
+ ######### Static Libraries ##########
+@@ -97,7 +97,7 @@ IF(MEDFILE_BUILD_STATIC_LIBS)
+   TARGET_LINK_LIBRARIES(medC_static ${HDF5_LIBS} ${MPI_LIBS})
+   MED_SET_DEFINITIONS(medC_static NOGDI)
+   
+-  INSTALL(TARGETS medC_static EXPORT ${_export_group} DESTINATION lib)
++  INSTALL(TARGETS medC_static EXPORT ${_export_group} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ ENDIF()
+ 
+ ########################### Fortran stuff ###################################
+@@ -113,7 +113,7 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
+       VERSION   11.0.0
+       SOVERSION 11.0.0)
+     TARGET_LINK_LIBRARIES(medfwrap medC)
+-    INSTALL(TARGETS medfwrap EXPORT medfileTargetsF DESTINATION lib)
++    INSTALL(TARGETS medfwrap EXPORT medfileTargetsF DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+     # Add Shared MED library
+     ADD_LIBRARY(med SHARED MEDiterators.c)
+@@ -124,7 +124,7 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
+     TARGET_LINK_LIBRARIES(med medfwrap)    
+    
+     # Install only the resulting library:
+-    INSTALL(TARGETS med EXPORT medTargetsF DESTINATION lib)
++    INSTALL(TARGETS med EXPORT medTargetsF DESTINATION ${CMAKE_INSTALL_LIBDIR})
+   ENDIF()
+ 
+   ######### Static Libraries ##########
+@@ -137,7 +137,7 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
+     ADD_LIBRARY(medfwrap_static STATIC ${medfort_wrap_SOURCES})
+     SET_TARGET_PROPERTIES(medfwrap_static PROPERTIES OUTPUT_NAME medfwrap)
+     TARGET_LINK_LIBRARIES(medfwrap_static medC_static)
+-    INSTALL(TARGETS medfwrap_static EXPORT medfileTargetsF DESTINATION lib)
++    INSTALL(TARGETS medfwrap_static EXPORT medfileTargetsF DESTINATION ${CMAKE_INSTALL_LIBDIR})
+     
+     # Add Static MED library
+     ADD_LIBRARY(med_static STATIC MEDiterators.c)
+@@ -145,7 +145,7 @@ IF(CMAKE_Fortran_COMPILER_WORKS)
+     TARGET_LINK_LIBRARIES(med_static medfwrap_static)
+ 
+     # Install only the resulting library:  
+-    INSTALL(TARGETS med_static EXPORT medfileTargetsF DESTINATION lib)
++    INSTALL(TARGETS med_static EXPORT medfileTargetsF DESTINATION ${CMAKE_INSTALL_LIBDIR})
+   ENDIF()
+   
+ ENDIF(CMAKE_Fortran_COMPILER_WORKS)
+diff --git a/tools/mdump/CMakeLists.txt b/tools/mdump/CMakeLists.txt
+index 7ba7065..2cf59bf 100644
+--- a/tools/mdump/CMakeLists.txt
++++ b/tools/mdump/CMakeLists.txt
+@@ -33,6 +33,3 @@ CONFIGURE_FILE(xmdump2.in ${PROJECT_BINARY_DIR}/xmdump2 @ONLY)
+ CONFIGURE_FILE(xmdump3.in ${PROJECT_BINARY_DIR}/xmdump3 @ONLY)
+ 
+ INSTALL(PROGRAMS ${PROJECT_BINARY_DIR}/xmdump2 ${PROJECT_BINARY_DIR}/xmdump3 DESTINATION bin)
+-INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E create_symlink mdump3 mdump WORKING_DIRECTORY ${DESTDIR}${CMAKE_INSTALL_PREFIX}/bin)")
+-INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E create_symlink xmdump3 xmdump WORKING_DIRECTORY ${DESTDIR}${CMAKE_INSTALL_PREFIX}/bin)")
+-

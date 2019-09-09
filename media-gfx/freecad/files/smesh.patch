@@ -1,0 +1,270 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 439c581f4..358e0a6f0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -133,16 +133,24 @@ endif()
+ # Output directories for install target
+ 
+ if(WIN32)
+-    SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Installation root directory")
++#IGNORE     SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Installation root directory")
+ else(WIN32)
+-    SET(CMAKE_INSTALL_PREFIX "/usr/lib${LIB_SUFFIX}/freecad" CACHE PATH "Installation root directory")
++#IGNORE     SET(CMAKE_INSTALL_PREFIX "/usr/lib${LIB_SUFFIX}/freecad" CACHE PATH "Installation root directory")
+ endif(WIN32)
+ 
+-SET(CMAKE_INSTALL_DATADIR data CACHE PATH "Output directory for data and resource files")
+-SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for header files")
+-SET(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Output directory for documentation and license files")
+-# Don't set it without manual adoption of LibDir variable in src/App/FreeCADInit.py
+-SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
++if(NOT CMAKE_INSTALL_DATADIR)
++       SET(CMAKE_INSTALL_DATADIR data CACHE PATH "Output directory for data and resource files")
++endif(NOT CMAKE_INSTALL_DATADIR)
++if(NOT CMAKE_INSTALL_INCLUDEDIR)
++       SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for header files")
++endif(NOT CMAKE_INSTALL_INCLUDEDIR)
++if(NOT CMAKE_INSTALL_DOCDIR)
++       SET(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Output directory for documentation and license files")
++endif(NOT CMAKE_INSTALL_DOCDIR)
++# Don't set it without manual adaption of LibDir variable in src/App/FreeCADInit.py
++if(NOT CMAKE_INSTALL_LIBDIR)
++       SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
++endif(NOT CMAKE_INSTALL_LIBDIR)
+ 
+ if(NOT WIN32)
+     if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
+@@ -1188,3 +1196,15 @@ if (${CMAKE_BUILD_TOOL} MATCHES "make")
+             "Now run 'make' to build ${PACKAGE_NAME}\n"
+             "=======================================\n")
+ endif()
++ 
++
++MESSAGE(STATUS "<<< Gentoo configuration >>>
++Build type      ${CMAKE_BUILD_TYPE}
++Install path    ${CMAKE_INSTALL_PREFIX}
++Compiler flags:
++C               ${CMAKE_C_FLAGS}
++C++             ${CMAKE_CXX_FLAGS}
++Linker flags:
++Executable      ${CMAKE_EXE_LINKER_FLAGS}
++Module          ${CMAKE_MODULE_LINKER_FLAGS}
++Shared          ${CMAKE_SHARED_LINKER_FLAGS}\n")
+diff --git a/src/Mod/Cam/App/best_fit.cpp b/src/Mod/Cam/App/best_fit.cpp
+index e4989d7c4..76c296c8b 100644
+--- a/src/Mod/Cam/App/best_fit.cpp
++++ b/src/Mod/Cam/App/best_fit.cpp
+@@ -59,7 +59,7 @@
+ 
+ #include <ANN/ANN.h> // ANN declarations
+ 
+-#include <SMESH_Gen.hxx>
++#include <smesh/SMESH_Gen.hxx>
+ 
+ 
+ best_fit::best_fit()
+diff --git a/src/Mod/Cam/App/best_fit.h b/src/Mod/Cam/App/best_fit.h
+index 1fdcfede1..3eea2ef19 100644
+--- a/src/Mod/Cam/App/best_fit.h
++++ b/src/Mod/Cam/App/best_fit.h
+@@ -33,7 +33,7 @@
+ #include <gp_Vec.hxx>
+ #include <TopoDS_Shape.hxx>
+ #include <TopoDS_Face.hxx>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMDS_VolumeTool.hxx>
+ 
+ 
+diff --git a/src/Mod/Fem/App/AppFemPy.cpp b/src/Mod/Fem/App/AppFemPy.cpp
+index e9dd68a93..d1983622b 100644
+--- a/src/Mod/Fem/App/AppFemPy.cpp
++++ b/src/Mod/Fem/App/AppFemPy.cpp
+@@ -42,8 +42,8 @@
+ //#include <Mod/Mesh/App/Core/Evaluation.h>
+ //#include <Mod/Mesh/App/Core/Iterator.h>
+ 
+-#include <SMESH_Gen.hxx>
+-#include <SMESH_Group.hxx>
++#include <smesh/SMESH_Gen.hxx>
++#include <smesh/SMESH_Group.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ #include <SMDS_MeshNode.hxx>
+ #include <StdMeshers_MaxLength.hxx>
+diff --git a/src/Mod/Fem/App/FemMesh.cpp b/src/Mod/Fem/App/FemMesh.cpp
+index 643b4bca8..baf6a4274 100644
+--- a/src/Mod/Fem/App/FemMesh.cpp
++++ b/src/Mod/Fem/App/FemMesh.cpp
+@@ -54,10 +54,10 @@
+ #endif
+ 
+ #include <boost/assign/list_of.hpp>
+-#include <SMESH_Gen.hxx>
+-#include <SMESH_Mesh.hxx>
+-#include <SMESH_MeshEditor.hxx>
+-#include <SMESH_Group.hxx>
++#include <smesh/SMESH_Gen.hxx>
++#include <smesh/SMESH_Mesh.hxx>
++#include <smesh/SMESH_MeshEditor.hxx>
++#include <smesh/SMESH_Group.hxx>
+ #include <SMDS_MeshGroup.hxx>
+ #include <SMESHDS_GroupBase.hxx>
+ #include <SMESHDS_Group.hxx>
+diff --git a/src/Mod/Fem/App/FemMeshPyImp.cpp b/src/Mod/Fem/App/FemMeshPyImp.cpp
+index 67c837373..7af14f553 100644
+--- a/src/Mod/Fem/App/FemMeshPyImp.cpp
++++ b/src/Mod/Fem/App/FemMeshPyImp.cpp
+@@ -30,9 +30,9 @@
+ #include <Base/PlacementPy.h>
+ #include <Base/QuantityPy.h>
+ 
+-#include <SMESH_Gen.hxx>
+-#include <SMESH_Group.hxx>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Gen.hxx>
++#include <smesh/SMESH_Group.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Group.hxx>
+ #include <SMDSAbs_ElementType.hxx>
+ #include <SMDS_MeshElement.hxx>
+diff --git a/src/Mod/Fem/App/FemMeshShapeNetgenObject.cpp b/src/Mod/Fem/App/FemMeshShapeNetgenObject.cpp
+index 5116e3203..1cf6e764c 100644
+--- a/src/Mod/Fem/App/FemMeshShapeNetgenObject.cpp
++++ b/src/Mod/Fem/App/FemMeshShapeNetgenObject.cpp
+@@ -33,10 +33,10 @@
+ #include <Mod/Part/App/PartFeature.h>
+ #include <Base/Console.h>
+ 
+-#include <SMESH_Gen.hxx>
++#include <smesh/SMESH_Gen.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ 
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMDS_PolyhedralVolumeOfNodes.hxx>
+ #include <SMDS_VolumeTool.hxx>
+ 
+diff --git a/src/Mod/Fem/App/FemMeshShapeObject.cpp b/src/Mod/Fem/App/FemMeshShapeObject.cpp
+index 5ebc2af9a..829b72223 100644
+--- a/src/Mod/Fem/App/FemMeshShapeObject.cpp
++++ b/src/Mod/Fem/App/FemMeshShapeObject.cpp
+@@ -31,8 +31,8 @@
+ #include <App/DocumentObjectPy.h>
+ #include <Base/Placement.h>
+ #include <Mod/Part/App/PartFeature.h>
+-#include <SMESH_Gen.hxx>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Gen.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMDS_PolyhedralVolumeOfNodes.hxx>
+ #include <SMDS_VolumeTool.hxx>
+ #include <StdMeshers_Arithmetic1D.hxx>
+diff --git a/src/Mod/Fem/App/FemPostPipeline.cpp b/src/Mod/Fem/App/FemPostPipeline.cpp
+index ab2b3013c..dd9cb1c34 100644
+--- a/src/Mod/Fem/App/FemPostPipeline.cpp
++++ b/src/Mod/Fem/App/FemPostPipeline.cpp
+@@ -33,7 +33,7 @@
+ 
+ #include <Base/Console.h>
+ #include <App/Document.h>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <App/DocumentObjectPy.h>
+ #include <Mod/Fem/App/FemPostPipelinePy.h>
+ 
+diff --git a/src/Mod/Fem/App/FemVTKTools.cpp b/src/Mod/Fem/App/FemVTKTools.cpp
+index 15d46a204..5401bb24d 100644
+--- a/src/Mod/Fem/App/FemVTKTools.cpp
++++ b/src/Mod/Fem/App/FemVTKTools.cpp
+@@ -49,8 +49,8 @@
+ #include <App/Document.h>
+ #include <App/DocumentObject.h>
+ 
+-#include <SMESH_Gen.hxx>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Gen.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMDS_PolyhedralVolumeOfNodes.hxx>
+ #include <SMDS_VolumeTool.hxx>
+ #include <SMESHDS_Mesh.hxx>
+diff --git a/src/Mod/Fem/Gui/Command.cpp b/src/Mod/Fem/Gui/Command.cpp
+index 54ba1230d..93c81fcb6 100644
+--- a/src/Mod/Fem/Gui/Command.cpp
++++ b/src/Mod/Fem/Gui/Command.cpp
+@@ -51,7 +51,7 @@
+ #include <Gui/Action.h>
+ #include <Gui/BitmapFactory.h>
+ 
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ #include <SMDSAbs_ElementType.hxx>
+ 
+diff --git a/src/Mod/Fem/Gui/PropertyFemMeshItem.cpp b/src/Mod/Fem/Gui/PropertyFemMeshItem.cpp
+index 6f6e9fdf8..89c3b5323 100644
+--- a/src/Mod/Fem/Gui/PropertyFemMeshItem.cpp
++++ b/src/Mod/Fem/Gui/PropertyFemMeshItem.cpp
+@@ -28,7 +28,7 @@
+ 
+ #include "PropertyFemMeshItem.h"
+ #include <Mod/Fem/App/FemMeshProperty.h>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ 
+ using namespace FemGui;
+ 
+diff --git a/src/Mod/Fem/Gui/TaskCreateNodeSet.cpp b/src/Mod/Fem/Gui/TaskCreateNodeSet.cpp
+index 9d14e38e3..6ad4ca670 100644
+--- a/src/Mod/Fem/Gui/TaskCreateNodeSet.cpp
++++ b/src/Mod/Fem/Gui/TaskCreateNodeSet.cpp
+@@ -44,7 +44,7 @@
+ #include <Inventor/nodes/SoCamera.h>
+ #include <Inventor/events/SoMouseButtonEvent.h>
+ 
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ #include <SMDSAbs_ElementType.hxx>
+ 
+diff --git a/src/Mod/Fem/Gui/ViewProviderFemMesh.cpp b/src/Mod/Fem/Gui/ViewProviderFemMesh.cpp
+index 8a2f3d060..4b0bd964b 100644
+--- a/src/Mod/Fem/Gui/ViewProviderFemMesh.cpp
++++ b/src/Mod/Fem/Gui/ViewProviderFemMesh.cpp
+@@ -63,7 +63,7 @@
+ #include <Base/BoundBox.h>
+ #include <sstream>
+ 
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ #include <SMDSAbs_ElementType.hxx>
+ 
+diff --git a/src/Mod/Fem/Gui/ViewProviderFemMeshPyImp.cpp b/src/Mod/Fem/Gui/ViewProviderFemMeshPyImp.cpp
+index 3a976462a..1fcbcf499 100644
+--- a/src/Mod/Fem/Gui/ViewProviderFemMeshPyImp.cpp
++++ b/src/Mod/Fem/Gui/ViewProviderFemMeshPyImp.cpp
+@@ -10,7 +10,7 @@
+ #include <Mod/Fem/App/FemResultObject.h>
+ #include <Mod/Fem/App/FemMeshObject.h>
+ #include <Mod/Fem/App/FemMesh.h>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ #include <SMDSAbs_ElementType.hxx>
+ 
+diff --git a/src/Mod/MeshPart/App/Mesher.cpp b/src/Mod/MeshPart/App/Mesher.cpp
+index 00baf3925..52ad3a1eb 100644
+--- a/src/Mod/MeshPart/App/Mesher.cpp
++++ b/src/Mod/MeshPart/App/Mesher.cpp
+@@ -41,9 +41,9 @@
+ # pragma clang diagnostic ignored "-Woverloaded-virtual"
+ #endif
+ 
+-#include <SMESH_Gen.hxx>
++#include <smesh/SMESH_Gen.hxx>
+ #include <StdMeshers_MaxLength.hxx>
+-#include <SMESH_Mesh.hxx>
++#include <smesh/SMESH_Mesh.hxx>
+ #include <SMESHDS_Mesh.hxx>
+ 
+ #if SMESH_VERSION_MAJOR < 7

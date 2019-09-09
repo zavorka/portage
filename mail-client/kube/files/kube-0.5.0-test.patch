@@ -1,0 +1,58 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ea5bc2d..da4119e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,4 +37,3 @@ add_subdirectory(components)
+ add_subdirectory(icons)
+ add_subdirectory(applications)
+ add_subdirectory(accounts)
+-add_subdirectory(tests)
+diff --git a/components/CMakeLists.txt b/components/CMakeLists.txt
+index 9ae2824..ed28b5f 100644
+--- a/components/CMakeLists.txt
++++ b/components/CMakeLists.txt
+@@ -8,6 +8,5 @@ macro(install_qml_component name)
+ endmacro(install_qml_component)
+ 
+ install_qml_component(kube)
+-add_subdirectory(kube/tests)
+ install_qml_component(accounts)
+ install_qml_component(mailviewer)
+diff --git a/framework/CMakeLists.txt b/framework/CMakeLists.txt
+index af45638..431c1ac 100644
+--- a/framework/CMakeLists.txt
++++ b/framework/CMakeLists.txt
+@@ -8,6 +8,5 @@ install(DIRECTORY qml/ DESTINATION ${FRAMEWORK_INSTALL_DIR})
+ install(FILES qmldir DESTINATION ${FRAMEWORK_INSTALL_DIR})
+ 
+ add_subdirectory(src)
+-add_subdirectory(qml/tests)
+ 
+ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+diff --git a/framework/src/CMakeLists.txt b/framework/src/CMakeLists.txt
+index a5b2f6b..a65fb75 100644
+--- a/framework/src/CMakeLists.txt
++++ b/framework/src/CMakeLists.txt
+@@ -69,11 +69,6 @@ target_link_libraries(frameworkplugin
+ )
+ install(TARGETS frameworkplugin DESTINATION ${FRAMEWORK_INSTALL_DIR})
+ 
+-set(BUILD_TESTING ON)
+-
+-add_subdirectory(tests)
+-add_subdirectory(domain/mime/tests)
+ add_subdirectory(domain/mime/mimetreeparser)
+-add_subdirectory(domain/settings/tests)
+ 
+ feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
+diff --git a/framework/src/domain/mime/mimetreeparser/CMakeLists.txt b/framework/src/domain/mime/mimetreeparser/CMakeLists.txt
+index e0bfec5..d48a4ac 100644
+--- a/framework/src/domain/mime/mimetreeparser/CMakeLists.txt
++++ b/framework/src/domain/mime/mimetreeparser/CMakeLists.txt
+@@ -53,6 +53,3 @@ target_link_libraries(kube_otp
+     Qt5::Gui
+ )
+ install(TARGETS kube_otp DESTINATION ${LIB_INSTALL_DIR})
+-
+-add_subdirectory(autotests)
+-add_subdirectory(tests)
