@@ -1,0 +1,10 @@
+diff --git a/scripts/gen-emugl-entries.py b/scripts/gen-emugl-entries.py
+index b88137e..73ede51 100755
+--- a/scripts/gen-emugl-entries.py
++++ b/scripts/gen-emugl-entries.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python2
++#!/usr/bin/env python3
+ 
+ # Copyright 2015 The Android Open Source Project
+ #

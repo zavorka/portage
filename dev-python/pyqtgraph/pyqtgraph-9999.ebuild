@@ -30,7 +30,7 @@ DEPEND="${RDEPEND}
 	dev-python/setuptools[${PYTHON_USEDEP}]
 	doc? ( dev-python/sphinx[${PYTHON_USEDEP}] )"
 
-#PATCHES=( "${FILESDIR}"/${P}-qt5.patch )
+PATCHES=( "${FILESDIR}"/${P}-numpy.patch )
 
 python_prepare_all() {
 	distutils-r1_python_prepare_all

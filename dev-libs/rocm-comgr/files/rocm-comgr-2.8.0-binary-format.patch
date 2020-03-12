@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7b4e83e..56cc9a2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,6 +209,7 @@ llvm_map_components_to_libnames(LLVM_LIBS
+   MCParser
+   MCDisassembler
+   Core
++  BinaryFormat
+   IRReader
+   CodeGen
+   Linker)

@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python{2_7,3_{5,6,7}} )
+PYTHON_COMPAT=( python{2_7,3_{5,6,7,8}} )
 
 inherit cmake-utils flag-o-matic python-single-r1
 
@@ -36,7 +36,9 @@ RDEPEND="
 DEPEND="${RDEPEND}"
 BDEPEND="
 	virtual/pkgconfig
-	doc? ( dev-python/sphinx[${PYTHON_USEDEP}] )
+	$(python_gen_cond_dep '
+		doc? ( dev-python/sphinx[${PYTHON_MULTI_USEDEP}] )
+	')
 "
 
 # Restricting tests, bugs #439790 and #447908

@@ -1,43 +1,14 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5d9fa4836..e4462dfda 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -1076,11 +1076,11 @@ if(NOT FREECAD_LIBPACK_USE OR FREECAD_LIBPACK_CHECKFILE_CLBUNDLER)
-             endif()
-         endif()
- 
--        if(NOT SHIBOKEN_INCLUDE_DIR)
-+        if(NOT TARGET Shiboken2::libshiboken)
-             message("====================\n"
-                     "shiboken2 not found.\n"
-                     "====================\n")
--        endif(NOT SHIBOKEN_INCLUDE_DIR)
-+        endif(NOT TARGET Shiboken2::libshiboken)
- 
-         find_package(PySide2 QUIET)# REQUIRED
-         if(NOT PYSIDE_INCLUDE_DIR)
-@@ -1132,8 +1132,8 @@ if(NOT FREECAD_LIBPACK_USE OR FREECAD_LIBPACK_CHECKFILE_CLBUNDLER)
+diff --git a/cMake/FreeCAD_Helpers/SetupShibokenAndPyside.cmake b/cMake/FreeCAD_Helpers/SetupShibokenAndPyside.cmake
+index 18a8d01d7..1ccdde469 100644
+--- a/cMake/FreeCAD_Helpers/SetupShibokenAndPyside.cmake
++++ b/cMake/FreeCAD_Helpers/SetupShibokenAndPyside.cmake
+@@ -109,9 +109,6 @@ macro(SetupShibokenAndPyside)
+         if (PYTHON_VERSION_MAJOR LESS 3)
              set(PYTHON_CONFIG_SUFFIX -python2.7 CACHE STRING "Shiboken cmake file suffix. If left empty, system default will be used: <ShibokenConfigPYTHON_CONFIG_SUFFIX.cmake>")
              set(PYTHON_BASENAME -python2.7 CACHE STRING "Same as PYTHON_SUFFIX but for PySide. If left empty, PYTHON_SUFFIX will be used: <PySideConfigPYTHON_BASENAME.cmake>")
-         else()
+-        else()
 -            set(PYTHON_CONFIG_SUFFIX "" CACHE STRING "Shiboken cmake file suffix. If left empty, system default will be used: <ShibokenConfigPYTHON_CONFIG_SUFFIX.cmake>")
 -            set(PYTHON_BASENAME "" CACHE STRING "Same as PYTHON_SUFFIX but for PySide. If left empty, PYTHON_SUFFIX will be used: <PySideConfigPYTHON_BASENAME.cmake>")
-+            #set(PYTHON_CONFIG_SUFFIX "" CACHE STRING "Shiboken cmake file suffix. If left empty, system default will be used: <ShibokenConfigPYTHON_CONFIG_SUFFIX.cmake>")
-+            #set(PYTHON_BASENAME "" CACHE STRING "Same as PYTHON_SUFFIX but for PySide. If left empty, PYTHON_SUFFIX will be used: <PySideConfigPYTHON_BASENAME.cmake>")
          endif()
  
          if(DEFINED MACPORTS_PREFIX)
-@@ -1142,11 +1142,11 @@ if(NOT FREECAD_LIBPACK_USE OR FREECAD_LIBPACK_CHECKFILE_CLBUNDLER)
-         endif(DEFINED MACPORTS_PREFIX)
- 
-         find_package(Shiboken)# REQUIRED
--        if(NOT SHIBOKEN_INCLUDE_DIR)
-+        if(NOT TARGET Shiboken2::libshiboken)
-             message(FATAL_ERROR "===================\n"
-                                 "shiboken not found.\n"
-                                 "===================\n")
--        endif(NOT SHIBOKEN_INCLUDE_DIR)
-+        endif(NOT TARGET Shiboken2::libshiboken)
- 
-         find_package(PySide)# REQUIRED
-         if(NOT PYSIDE_INCLUDE_DIR)

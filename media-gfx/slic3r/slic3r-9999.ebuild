@@ -24,6 +24,7 @@ IUSE="+gui test"
 
 RDEPEND=">=dev-libs/boost-1.55[threads]
 	>=sci-libs/nlopt-2.4.2
+	media-gfx/openvdb
 	gui? (	>=media-libs/freeglut-3
 		x11-libs/libXmu
 		>=x11-libs/wxGTK-3.0

@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
-PYTHON_COMPAT=( python{2_7,3_{4,5,6,7}} )
+PYTHON_COMPAT=( python{2_7,3_{4,5,6,7,8}} )
 
 inherit cmake-utils python-single-r1
 
@@ -50,8 +50,10 @@ RDEPEND=">=dev-libs/boost-1.62:=
 	ptex? ( media-libs/ptex:= )
 	python? (
 		${PYTHON_DEPS}
-		dev-libs/boost:=[python,${PYTHON_USEDEP}]
-		dev-util/pybind11:=[${PYTHON_USEDEP}]
+		$(python_gen_cond_dep '
+			dev-libs/boost:=[python,${PYTHON_MULTI_USEDEP}]
+			dev-python/pybind11:=[${PYTHON_MULTI_USEDEP}]
+		')
 	)
 	qt5? (
 		dev-qt/qtcore:5

@@ -5,7 +5,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_6 python3_7 )
+PYTHON_COMPAT=( python3_6 python3_7 python3_8 )
 
 inherit check-reqs cmake-utils desktop python-single-r1 xdg
 
@@ -64,14 +64,21 @@ RDEPEND="
 	${PYTHON_DEPS}
 	>=dev-cpp/eigen-3.3.1:3
 	dev-libs/OpenNI2[opengl(+)]
-	dev-libs/boost:=[mpi?,python,threads,${PYTHON_USEDEP}]
 	dev-libs/libspnav
 	dev-libs/xerces-c
-	dev-python/matplotlib[${PYTHON_USEDEP}]
-	dev-python/numpy[${PYTHON_USEDEP}]
-	dev-python/pivy[${PYTHON_USEDEP}]
-	dev-python/pyside:2[gui,svg,${PYTHON_USEDEP}]
-	dev-python/shiboken:2[${PYTHON_USEDEP}]
+	$(python_gen_cond_dep '
+		dev-libs/boost:=[mpi?,python,threads,${PYTHON_MULTI_USEDEP}]
+		dev-python/matplotlib[${PYTHON_MULTI_USEDEP}]
+		dev-python/numpy[${PYTHON_MULTI_USEDEP}]
+		dev-python/pivy[${PYTHON_MULTI_USEDEP}]
+		dev-python/pyside:2[gui,svg,${PYTHON_MULTI_USEDEP}]
+		dev-python/shiboken:2[${PYTHON_MULTI_USEDEP}]
+		>=sci-libs/libmed-4.0.0[fortran,mpi?,python,${PYTHON_MULTI_USEDEP}]
+		mesh? (
+			netgen? ( >=sci-mathematics/netgen-6.2.1810[mpi?,python,opencascade,${PYTHON_MULTI_USEDEP}] )
+			dev-python/pybind11[${PYTHON_MULTI_USEDEP}]
+		)
+	')
 	dev-qt/designer:5
 	dev-qt/qtconcurrent:5
 	dev-qt/qtcore:5
@@ -88,7 +95,6 @@ RDEPEND="
 	media-libs/freetype
 	media-libs/qhull
 	sci-libs/flann[mpi?,openmp]
-	>=sci-libs/libmed-4.0.0[fortran,mpi?,python,${PYTHON_USEDEP}]
 	sci-libs/orocos_kdl:=
 	sci-libs/opencascade:7.3.0[vtk(+)]
 	sys-libs/zlib
@@ -96,19 +102,19 @@ RDEPEND="
 	virtual/libusb:1
 	virtual/opengl
 	mesh? (
-		dev-util/pybind11[${PYTHON_USEDEP}]
 		sci-libs/hdf5:=[fortran,mpi?,zlib]
 	)
 	mpi? (
 		virtual/mpi[cxx,fortran,threads]
 	)
-	netgen? ( >=sci-mathematics/netgen-6.2.1810[mpi?,python,opencascade,${PYTHON_USEDEP}] )
 	openscad? ( media-gfx/openscad )
 	pcl? ( >=sci-libs/pcl-1.8.1:=[opengl,openni2(+),qt5(+),vtk(+)] )
 "
 DEPEND="${RDEPEND}"
 BDEPEND="
-	dev-python/pyside-tools:2[${PYTHON_USEDEP}]
+	$(python_gen_cond_dep '
+		dev-python/pyside-tools:2[${PYTHON_MULTI_USEDEP}]
+	')
 	dev-lang/swig
 "
 
@@ -136,9 +142,9 @@ DOCS=( README.md ChangeLog.txt )
 
 # FIXME: Check the find-Coin.tag patch after updates of media-libs/coin
 #	"${FILESDIR}/smesh-pthread.patch"
+#	"${FILESDIR}/${P}-find-Coin.tag.patch"
 PATCHES=(
 	"${FILESDIR}/${PN}-0.18.2-Fix-to-find-boost_python.patch"
-	"${FILESDIR}/${P}-find-Coin.tag.patch"
 	"${FILESDIR}/${P}-shiboken.patch"
 )
 
@@ -268,10 +274,6 @@ src_install() {
 	done
 	doicon -s scalable "${S}"/src/Gui/Icons/${PN}.svg
 	newicon -s 64 -c mimetypes "${S}"/src/Gui/Icons/${PN}-doc.png application-x-extension-fcstd.png
-
-	rm "${ED}"/usr/share/${PN}/data/${PN}-{doc,icon-{16,32,48,64}}.png || die
-	rm "${ED}"/usr/share/${PN}/data/${PN}.svg || die
-	rm "${ED}"/usr/share/${PN}/data/${PN}.xpm || die
 
 	if use doc; then
 		[[ ${PV} == *9999 ]] && einfo "Docs are not downloaded for ${PV}" \

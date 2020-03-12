@@ -23,19 +23,19 @@ else
 fi
 
 LICENSE="BSD"
-SLOT="0/19"
+SLOT="0/22"
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~x86-linux ~x64-macos ~x86-macos"
 IUSE="emacs examples test zlib"
 RESTRICT="!test? ( test )"
 
-BDEPEND="emacs? ( virtual/emacs )"
+BDEPEND="emacs? ( app-editors/emacs:* )"
 DEPEND="test? ( >=dev-cpp/gtest-1.9[${MULTILIB_USEDEP}] )
 	zlib? ( sys-libs/zlib[${MULTILIB_USEDEP}] )"
-RDEPEND="emacs? ( virtual/emacs )
+RDEPEND="emacs? ( app-editors/emacs:* )
 	zlib? ( sys-libs/zlib[${MULTILIB_USEDEP}] )"
 
 PATCHES=(
-	"${FILESDIR}/${PN}-3.8.0-protoc_input_output_files.patch"
+	"${FILESDIR}/${PN}-3.11.0-protoc_input_output_files.patch"
 )
 
 DOCS=(CHANGES.txt CONTRIBUTORS.txt README.md)

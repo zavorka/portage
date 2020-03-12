@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6a36eb0..50e4a61 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -266,6 +266,8 @@ set (czmq_headers
+     include/zmonitor.h
+     include/zproxy.h
+     include/zrex.h
++)
++set (private_headers
+     src/zgossip_msg.h
+     src/zsock_option.inc
+     src/zgossip_engine.inc

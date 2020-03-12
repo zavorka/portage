@@ -6,7 +6,7 @@ EAPI=6
 CMAKE_IN_SOURCE_BUILD="1"
 CMAKE_MAKEFILE_GENERATOR="emake" # bug 558248
 
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6,3_7} )
+PYTHON_COMPAT=( python{3_4,3_5,3_6,3_7,3_8} )
 
 inherit cmake-utils git-r3 python-r1 virtualx
 
@@ -21,8 +21,10 @@ IUSE="test"
 
 RDEPEND="
 	${PYTHON_DEPS}
-	>=dev-python/pyside-2.0.0:${SLOT}[${PYTHON_USEDEP}]
-	>=dev-python/shiboken-2.0.0:${SLOT}[${PYTHON_USEDEP}]
+	$(python_gen_cond_dep '
+		dev-python/pyside:2[${PYTHON_USEDEP}]
+		dev-python/shiboken:2[${PYTHON_USEDEP}]
+	')
 	dev-qt/qtcore:5
 	dev-qt/qtgui:5
 "

@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python2_7 python3_{4,5,6,7} )
+PYTHON_COMPAT=( python3_{4,5,6,7,8} )
 
 inherit cmake-utils python-r1 virtualx git-r3
 
@@ -52,7 +52,6 @@ QT_PV="5.12.0:5"
 
 DEPEND="
 	${PYTHON_DEPS}
-	>=dev-python/shiboken-${PV}:${SLOT}[${PYTHON_USEDEP}]
 	>=dev-qt/qtcore-${QT_PV}
 	>=dev-qt/qtxml-${QT_PV}
 	charts? ( >=dev-qt/qtcharts-${QT_PV} )
@@ -77,6 +76,9 @@ DEPEND="
 	widgets? ( >=dev-qt/qtwidgets-${QT_PV} )
 	x11extras? ( >=dev-qt/qtx11extras-${QT_PV} )
 	xmlpatterns? ( >=dev-qt/qtxmlpatterns-${QT_PV} )
+	$(python_gen_cond_dep '
+		dev-python/shiboken:2[${PYTHON_USEDEP}]
+	')
 "
 RDEPEND="${DEPEND}"
 

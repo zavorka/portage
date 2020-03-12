@@ -30,6 +30,9 @@ DEPEND="${RDEPEND}
 
 DOCS=( NEWS AUTHORS )
 
+PATCHES=(
+	"${FILESDIR}"/0001-headers.patch
+)
 src_configure() {
         local mycmakeargs=(
 		-DENABLE_DRAFTS=$(usex drafts)

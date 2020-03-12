@@ -1,0 +1,222 @@
+diff --git a/molequeue/app/CMakeLists.txt b/molequeue/app/CMakeLists.txt
+index f857a8d..8f37cb5 100644
+--- a/molequeue/app/CMakeLists.txt
++++ b/molequeue/app/CMakeLists.txt
+@@ -15,8 +15,8 @@ else()
+   set(MoleQueue_LIB_DIR "${INSTALL_LIBRARY_DIR}")
+ endif()
+ 
+-# Find a python 2.x interpreter.
+-find_package(PythonInterp 2 QUIET)
++# Find a python interpreter.
++find_package(Python COMPONENTS Interpreter QUIET)
+ 
+ include(GenerateExportHeader)
+ 
+diff --git a/molequeue/app/testing/CMakeLists.txt b/molequeue/app/testing/CMakeLists.txt
+index f79a17a..6c57476 100644
+--- a/molequeue/app/testing/CMakeLists.txt
++++ b/molequeue/app/testing/CMakeLists.txt
+@@ -8,8 +8,8 @@ set(MoleQueue_TESTDATA_DIR
+ set(MoleQueue_TESTSCRIPT_DIR
+   "${MoleQueue_SOURCE_DIR}/molequeue/app/testing/scripts/")
+ set(MoleQueue_TESTEXEC_DIR "${MoleQueue_BINARY_DIR}/bin/")
+-if(PYTHON_EXECUTABLE)
+-  set(MoleQueue_PYTHON_EXECUTABLE "${PYTHON_EXECUTABLE}")
++if(Python_EXECUTABLE)
++  set(MoleQueue_PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
+ endif()
+ configure_file(molequeuetestconfig.h.in molequeuetestconfig.h)
+ 
+diff --git a/molequeue/app/testing/scripts/sendRpcKill.py b/molequeue/app/testing/scripts/sendRpcKill.py
+index 766fbe9..c212fdf 100644
+--- a/molequeue/app/testing/scripts/sendRpcKill.py
++++ b/molequeue/app/testing/scripts/sendRpcKill.py
+@@ -10,7 +10,7 @@ socketname = ""
+ def run_test():
+   global socketname
+   if debug:
+-    print "Connecting to socket: %s"%socketname
++    print("Connecting to socket: %s"%socketname)
+   client = mq.Client()
+   client.connect_to_server(socketname)
+   res = client._send_rpc_kill_request(5)
+@@ -32,10 +32,10 @@ def main(argv):
+   try:
+     test_result = run_test()
+   except Exception as ex:
+-    print ex
++    print(ex)
+     test_result = 1
+   if debug:
+-    print "Exiting with code: %d"%test_result
++    print("Exiting with code: %d"%test_result)
+   sys.stdout.flush()
+   return test_result
+ 
+diff --git a/molequeue/app/testing/scripts/submitJob.py b/molequeue/app/testing/scripts/submitJob.py
+index d5c2a94..04eea45 100644
+--- a/molequeue/app/testing/scripts/submitJob.py
++++ b/molequeue/app/testing/scripts/submitJob.py
+@@ -16,7 +16,7 @@ mq_id_lock = Lock()
+ def run_test():
+   global socketname, molequeue_ids_done, clientId, mq_id_lock, num_jobs
+   if debug:
+-    print "Client %s connecting to socket: %s"%(clientId, socketname)
++    print("Client %s connecting to socket: %s"%(clientId, socketname))
+   client = mq.Client()
+   client.connect_to_server(socketname)
+ 
+@@ -29,9 +29,9 @@ def run_test():
+           with mq_id_lock:
+             molequeue_ids_done.append(moleQueueId)
+           if debug:
+-            print "Job %d finished! (Client %s)"%(moleQueueId, clientId)
++            print("Job %d finished! (Client %s)"%(moleQueueId, clientId))
+     except Exception as ex:
+-      print "Unexpected notification:", msg, ex
++      print("Unexpected notification:", msg, ex)
+     sys.stdout.flush()
+ 
+   client.register_notification_callback(notification_callback)
+@@ -50,15 +50,15 @@ def run_test():
+       client.disconnect()
+       raise Exception("Connection timed out!")
+     if debug:
+-      print "Submitted job %d (Client %s)"%(molequeue_id, clientId)
++      print("Submitted job %d (Client %s)"%(molequeue_id, clientId))
+     sys.stdout.flush()
+ 
+   timeout = 30
+   mq_id_lock.acquire()
+   while len(molequeue_ids) != len(molequeue_ids_done) and timeout > 0:
+     if debug:
+-      print "Client %s waiting to finish (timeout=%d unmatchedIDs=%d)"%\
+-        (clientId, timeout, len(molequeue_ids) - len(molequeue_ids_done))
++      print("Client %s waiting to finish (timeout=%d unmatchedIDs=%d)"%\
++        (clientId, timeout, len(molequeue_ids) - len(molequeue_ids_done)))
+     sys.stdout.flush()
+     timeout -= 1
+     mq_id_lock.release()
+@@ -90,10 +90,10 @@ def main(argv):
+   try:
+     test_result = run_test()
+   except Exception as ex:
+-    print ex
++    print(ex)
+     test_result = 1
+   if debug:
+-    print "Exiting with code: %d (client %s)"%(test_result, clientId)
++    print("Exiting with code: %d (client %s)"%(test_result, clientId))
+   sys.stdout.flush()
+   return test_result
+ 
+diff --git a/python/CMakeLists.txt b/python/CMakeLists.txt
+index c1bf08c..c0a43ab 100644
+--- a/python/CMakeLists.txt
++++ b/python/CMakeLists.txt
+@@ -1,14 +1,9 @@
+-find_package(PythonInterp REQUIRED)
+-
+-if(PYTHONINTERP_FOUND)
+-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+-    "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+-    OUTPUT_VARIABLE PYTHON_PACKAGES_DIR
+-    OUTPUT_STRIP_TRAILING_WHITESPACE)
++find_package(Python COMPONENTS Interpreter REQUIRED)
+ 
++if(Python_FOUND)
+   install(FILES
+     molequeue/__init__.py
+     molequeue/client.py
+     molequeue/utils.py
+-    DESTINATION "${PYTHON_PACKAGES_DIR}/molequeue")
++    DESTINATION "${Python_SITELIB}/molequeue")
+ endif()
+diff --git a/python/molequeue/__init__.py b/python/molequeue/__init__.py
+index d6228af..8dac3c0 100644
+--- a/python/molequeue/__init__.py
++++ b/python/molequeue/__init__.py
+@@ -1,2 +1,2 @@
+-from client import Client, Job, JobState, JobException, \
++from .client import Client, Job, JobState, JobException, \
+ FilePath, FileContents, Queue, JobInformationException
+diff --git a/python/molequeue/client.py b/python/molequeue/client.py
+index 86957bf..d62a479 100644
+--- a/python/molequeue/client.py
++++ b/python/molequeue/client.py
+@@ -11,9 +11,9 @@ import time
+ import tempfile
+ import sys
+ 
+-from utils import underscore_to_camelcase
+-from utils import camelcase_to_underscore
+-from utils import JsonRpc
++from .utils import underscore_to_camelcase
++from .utils import camelcase_to_underscore
++from .utils import JsonRpc
+ import threading
+ 
+ class JobState:
+@@ -270,7 +270,7 @@ class Client:
+       while self._request_response_map[packet_id] == None:
+         # need to set a wait time otherwise the wait can't be interrupted
+         # See http://bugs.python.org/issue8844
+-        wait_time = sys.maxint
++        wait_time = sys.maxsize
+         if timeout != None:
+           wait_time = timeout - (time.time() - start)
+           if wait_time <= 0:
+diff --git a/python/molequeue/utils.py b/python/molequeue/utils.py
+index c412114..fa108bc 100644
+--- a/python/molequeue/utils.py
++++ b/python/molequeue/utils.py
+@@ -22,7 +22,7 @@ class JsonRpc:
+   def json_to_job(json):
+     job = molequeue.Job()
+     # convert response into Job object
+-    for key, value in json['result'].iteritems():
++    for key, value in json['result'].items():
+       field = camelcase_to_underscore(key)
+       if key in JsonRpc.INTERNAL_FIELDS:
+         field = '_' + field
+@@ -34,7 +34,7 @@ class JsonRpc:
+   def json_to_queues(json):
+     queues = []
+ 
+-    for name, programs in json['result'].iteritems():
++    for name, programs in json['result'].items():
+       queue = molequeue.Queue();
+       queue.name = name
+       queue.programs = programs
+@@ -46,7 +46,7 @@ class JsonRpc:
+   def object_to_json_params(job):
+     params = {}
+ 
+-    for key, value in job.__dict__.iteritems():
++    for key, value in job.__dict__.items():
+       field = underscore_to_camelcase(key)
+ 
+       if type(value) == types.InstanceType:
+diff --git a/python/test/clienttest.py b/python/test/clienttest.py
+index 0608031..50f7f4e 100644
+--- a/python/test/clienttest.py
++++ b/python/test/clienttest.py
+@@ -21,7 +21,7 @@ class TestClient(unittest.TestCase):
+ 
+     molequeue_id = client.submit_job(job)
+ 
+-    print "MoleQueue ID: ", molequeue_id
++    print("MoleQueue ID: ", molequeue_id)
+ 
+     self.assertTrue(isinstance(molequeue_id, int))
+ 
+@@ -105,7 +105,7 @@ class TestClient(unittest.TestCase):
+     queues = client.request_queue_list_update()
+ 
+     for q in queues:
+-      print q.name, ", ", q.programs;
++      print(q.name, ", ", q.programs);
+ 
+     client.disconnect()
+ 
