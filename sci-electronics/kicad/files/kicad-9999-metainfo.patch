@@ -1,0 +1,45 @@
+From 64c5f090f07504415b6b35225b07bd7e9f3a58b6 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Wed, 29 Jul 2020 05:46:32 +0200
+Subject: [PATCH 3/3] metainfo
+
+---
+ CMakeLists.txt                                 | 2 +-
+ CMakeModules/WritePlatformMetadata_linux.cmake | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d9021ac53..eb3ceddf4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -917,7 +917,7 @@ if( UNIX AND NOT APPLE )
+     set( UNIX_MIME_FILES ${UNIX_MIME_DIR}/mime )
+     set( UNIX_ICON_FILES ${UNIX_MIME_DIR}/icons )
+     set( UNIX_APPLICATIONS_FILES ${UNIX_MIME_DIR}/applications )
+-    set( UNIX_APPDATA_FILES ${PROJECT_BINARY_DIR}/resources/linux/appdata )
++    set( UNIX_APPDATA_FILES ${PROJECT_BINARY_DIR}/resources/linux/metainfo )
+ 
+     # Install Mime directory
+     install( DIRECTORY ${UNIX_ICON_FILES}
+diff --git a/CMakeModules/WritePlatformMetadata_linux.cmake b/CMakeModules/WritePlatformMetadata_linux.cmake
+index dcb435a18..af111a72b 100644
+--- a/CMakeModules/WritePlatformMetadata_linux.cmake
++++ b/CMakeModules/WritePlatformMetadata_linux.cmake
+@@ -36,11 +36,11 @@ include( ${CMAKE_MODULE_PATH}/KiCadFullVersion.cmake )
+ string( TIMESTAMP KICAD_CONFIG_TIMESTAMP "%Y-%m-%d" )
+ 
+ # Configure the KiCad appdata file
+-configure_file( ${PROJECT_SOURCE_DIR}/resources/linux/appdata/kicad.appdata.xml.in
+-                ${PROJECT_BINARY_DIR}/resources/linux/appdata/kicad.appdata.xml
++configure_file( ${PROJECT_SOURCE_DIR}/resources/linux/metainfo/kicad.appdata.xml.in
++                ${PROJECT_BINARY_DIR}/resources/linux/metainfo/kicad.appdata.xml
+                 @ONLY )
+ 
+ # Ensure the file was configured successfully
+-if( NOT EXISTS ${PROJECT_BINARY_DIR}/resources/linux/appdata/kicad.appdata.xml )
++if( NOT EXISTS ${PROJECT_BINARY_DIR}/resources/linux/metainfo/kicad.appdata.xml )
+     message( FATAL_ERROR "Configuration failed to write file kicad.appdata.xml." )
+ endif()
+-- 
+2.27.0
+

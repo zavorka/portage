@@ -1,0 +1,134 @@
+From f76378891451513760b9a251c952dde4249e8b31 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Wed, 29 Jul 2020 05:45:31 +0200
+Subject: [PATCH 2/3] help
+
+---
+ CMakeLists.txt                    |  4 ++++
+ CMakeModules/config.h.cmake       |  4 ++++
+ common/searchhelpfilefullpath.cpp | 34 ++++++++++++++++++++++++++++---
+ 3 files changed, 39 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5dcc310b7..d9021ac53 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -447,6 +447,10 @@ endif()
+ set( KIFACE_PREFIX  "_" )
+ #message( STATUS "KIFACE_SUFFIX:${KIFACE_SUFFIX}  KIFACE_PREFIX:${KIFACE_PREFIX}" )
+ 
++# KICAD_HELP is the location of the help files accessed from the UI
++# (usually provided via kicad-doc package)
++set ( KICAD_HELP share/doc/kicad
++    CACHE PATH "Alternative location of KiCad help files.")
+ 
+ #================================================
+ # Locations for install targets.
+diff --git a/CMakeModules/config.h.cmake b/CMakeModules/config.h.cmake
+index 9aa8a173d..25a1c6a4f 100644
+--- a/CMakeModules/config.h.cmake
++++ b/CMakeModules/config.h.cmake
+@@ -64,6 +64,10 @@
+ /// The install prefix defined during CMake configuration or fall back to CMAKE_INSTALL_PREFIX.
+ #define DEFAULT_INSTALL_PATH            "@DEFAULT_INSTALL_PATH@"
+ 
++/// KiCad help files path can be different on some systems allow adding alternative,
++/// search path for them. Defaults to CMAKE_INSTALL_PREFIX/share/doc/kicad
++#define KICAD_HELP                       "@KICAD_HELP@"
++
+ /// The wxPython version found during configuration.
+ #if defined( KICAD_SCRIPTING_WXPYTHON )
+ #define WXPYTHON_VERSION                "@WXPYTHON_VERSION@"
+diff --git a/common/searchhelpfilefullpath.cpp b/common/searchhelpfilefullpath.cpp
+index 64636dbef..b5c0ec0c4 100644
+--- a/common/searchhelpfilefullpath.cpp
++++ b/common/searchhelpfilefullpath.cpp
+@@ -25,7 +25,7 @@
+ 
+ #include <pgm_base.h>
+ #include <common.h>
+-#include <config.h>     // to define DEFAULT_INSTALL_PATH
++#include <config.h>     // to define DEFAULT_INSTALL_PATH and KICAD_HELP
+ #include <macros.h>
+ #include <trace_helpers.h>
+ 
+@@ -69,6 +69,10 @@ wxString SearchHelpFileFullPath( const SEARCH_STACK& aSStack, const wxString& aB
+     wxArrayString   subdirs;
+     wxArrayString   altsubdirs;
+     SEARCH_STACK    ss = aSStack;
++#if ! defined(__WXMAC__) // && defined(__linux__)
++    SEARCH_STACK    altss;
++    wxArrayString   moresubdirs;
++#endif
+ 
+     // It might already be in aSStack, but why depend on other code
+     // far away when it's so easy to add it again (to our copy) as the first place to look.
+@@ -76,6 +80,7 @@ wxString SearchHelpFileFullPath( const SEARCH_STACK& aSStack, const wxString& aB
+     // This is CMAKE_INSTALL_PREFIX unless DEFAULT_INSTALL_PATH was defined during
+     // build configuration:
+     ss.AddPaths( wxT( DEFAULT_INSTALL_PATH ), 0 );
++    altss.AddPaths( wxT( KICAD_HELP ), 0 );
+ 
+ #if defined(__WXMAC__)
+     ss.AddPaths( GetOSXKicadMachineDataDir() );
+@@ -104,16 +109,17 @@ wxString SearchHelpFileFullPath( const SEARCH_STACK& aSStack, const wxString& aB
+ 
+     // Based on kicad-doc.bzr/CMakeLists.txt, line 20, the help files are
+     // installed into "<CMAKE_INSTALL_PREFIX>/share/doc/kicad/help" for linux.
+-    // This is ${KICAD_HELP} var in that CMakeLists.txt file.
+     // Below we account for an international subdirectory.
+     subdirs.Add( "share" );
+     subdirs.Add( "doc" );
+     subdirs.Add( "kicad" );
+     subdirs.Add( "help" );
+ 
++    // For custom help path installations via ${KICAD_HELP}
++    moresubdirs.Add( "help" );
++
+     // Based on kicad-doc.bzr/CMakeLists.txt, line 35, the help files are
+     // installed into "<CMAKE_INSTALL_PREFIX>/doc/help" for Windows.
+-    // This is ${KICAD_HELP} var in that CMakeLists.txt file.
+     // Below we account for an international subdirectory.
+     altsubdirs.Add( "doc" );
+     altsubdirs.Add( "help" );
+@@ -159,6 +165,9 @@ wxString SearchHelpFileFullPath( const SEARCH_STACK& aSStack, const wxString& aB
+     {
+         subdirs.Add( locale_name_dirs[ii] );
+         altsubdirs.Add( locale_name_dirs[ii] );
++#if ! defined(__WXMAC__) // && defined(__linux__)
++        moresubdirs.Add( locale_name_dirs[ii] );
++#endif
+ 
+         fn = FindFileInSearchPaths( ss, aBaseName + wxT( ".html" ), &altsubdirs );
+ 
+@@ -188,8 +197,27 @@ wxString SearchHelpFileFullPath( const SEARCH_STACK& aSStack, const wxString& aB
+         if( !fn.IsEmpty() )
+             break;
+ 
++#if ! defined(__WXMAC__) // && defined(__linux__)
++        fn = FindFileInSearchPaths( altss, aBaseName + wxT( ".html" ), &moresubdirs );
++
++        if( !fn.IsEmpty() )
++        {
++            // Prepend URI protocol since we will open in a browser
++            fn = wxT( "file://" ) + fn;
++            break;
++        }
++
++        fn = FindFileInSearchPaths( altss, aBaseName + wxT( ".pdf" ), &moresubdirs );
++
++        if( !fn.IsEmpty() )
++            break;
++#endif
++
+         subdirs.RemoveAt( subdirs.GetCount() - 1 );
+         altsubdirs.RemoveAt( altsubdirs.GetCount() - 1 );
++#if ! defined(__WXMAC__) // && defined(__linux__)
++        moresubdirs.RemoveAt( altsubdirs.GetCount() - 1 );
++#endif
+     }
+ 
+     return fn;
+-- 
+2.27.0
+

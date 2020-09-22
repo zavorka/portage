@@ -1,0 +1,31 @@
+--- /var/db/repos/gentoo/sys-apps/util-linux/util-linux-2.33.1.ebuild	2020-04-20 06:33:04.175467707 +0200
++++ /usr/local/portage/sys-apps/util-linux/util-linux-2.33.1.ebuild	2020-04-20 06:38:10.811075937 +0200
+@@ -16,6 +16,7 @@
+ 	inherit git-r3 autotools
+ 	EGIT_REPO_URI="https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git"
+ else
++	inherit autotools
+ 	[[ "${PV}" = *_rc* ]] || \
+ 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~riscv ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~amd64-linux ~x86-linux"
+ 	SRC_URI="mirror://kernel/linux/utils/util-linux/v${PV:0:4}/${MY_P}.tar.xz"
+@@ -87,10 +88,8 @@
+ 		rm tests/ts/uuid/oids || die
+ 	fi
+ 
+-	if [[ ${PV} == 9999 ]] ; then
+-		po/update-potfiles
+-		eautoreconf
+-	fi
++	po/update-potfiles
++	eautoreconf
+ 
+ 	# Undo bad ncurses handling by upstream. #601530
+ 	sed -i -E \
+@@ -161,6 +160,7 @@
+ 		$(use_enable static-libs static)
+ 		$(use_with selinux)
+ 		$(use_with ncurses tinfo)
++                --enable-static-programs=blkid
+ 	)
+ 	# build programs only on GNU, on *BSD we want libraries only
+ 	if multilib_is_native_abi && use userland_GNU; then

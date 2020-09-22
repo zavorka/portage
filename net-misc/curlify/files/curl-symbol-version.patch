@@ -1,0 +1,13 @@
+diff --git a/lib/libcurl.vers.in b/lib/libcurl.vers.in
+index ae978a4..bce5633 100644
+--- a/lib/libcurl.vers.in
++++ b/lib/libcurl.vers.in
+@@ -6,7 +6,7 @@ HIDDEN
+     _save*;
+ };
+ 
+-CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@4
++CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@3
+ {
+   global: curl_*;
+   local: *;
