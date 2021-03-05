@@ -1,7 +1,7 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 inherit golang-build golang-vcs-snapshot bash-completion-r1
 
 EGO_PN="k8s.io/kops"

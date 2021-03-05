@@ -28,6 +28,7 @@ src_prepare() {
 		"${FILESDIR}"/${P}-parallel-build.patch
 		"${FILESDIR}"/${P}-version.patch
 		"${FILESDIR}"/${P}-gcc5.patch
+		"${FILESDIR}"/${P}-multiple-definitions.patch
 	)
 	xorg-2_src_prepare
 }

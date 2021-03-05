@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=6
+EAPI=7
 EGO_PN=gitlab.com/gitlab-org/gitlab-ci-multi-runner
 
 if [[ ${PV} = *9999* ]]; then

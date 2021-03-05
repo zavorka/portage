@@ -1,13 +1,13 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # This is in currently WIP! It should work though.
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_6 python3_7 python3_8 )
+PYTHON_COMPAT=( python3_{6..9} )
 
-inherit check-reqs cmake-utils desktop python-single-r1 xdg
+inherit check-reqs cmake desktop python-single-r1 xdg
 
 DESCRIPTION="QT based Computer Aided Design application"
 HOMEPAGE="https://www.freecadweb.org/"
@@ -39,13 +39,12 @@ SLOT="0"
 
 IUSE="debug doc mpi netgen pcl"
 
-FREECAD_EXPERIMENTAL_MODULES="assembly"
+FREECAD_EXPERIMENTAL_MODULES="assembly plot ship"
 #FREECAD_DEBUG_MODULES="sandbox template"
-FREECAD_STABLE_MODULES="addonmgr arch complete drawing fem idf
+FREECAD_STABLE_MODULES="addonmgr arch drawing fem idf
 	image inspection material mesh openscad
-	part_design path points raytracing reverseengineering robot
-	ship show spreadsheet surface techdraw
-	tux"
+	part-design path points raytracing robot
+	show spreadsheet surface techdraw tux"
 FREECAD_DISABLED_MODULES="vr"
 FREECAD_ALL_MODULES="${FREECAD_STABLE_MODULES}
 	${FREECAD_EXPERIMENTAL_MODULES} ${FREECAD_DISABLED_MODULES}"
@@ -58,27 +57,14 @@ for module in ${FREECAD_EXPERIMENTAL_MODULES}; do
 done
 unset module
 
-# eigen is needed by sketcher which we enable by default, so remove USE flag and
+# Eigen is needed by sketcher which we enable by default, so remove USE flag and
 # unconditionally depend on it
 RDEPEND="
 	${PYTHON_DEPS}
 	>=dev-cpp/eigen-3.3.1:3
 	dev-libs/OpenNI2[opengl(+)]
-	dev-libs/libspnav
+	dev-libs/libspnav[X]
 	dev-libs/xerces-c
-	$(python_gen_cond_dep '
-		dev-libs/boost:=[mpi?,python,threads,${PYTHON_MULTI_USEDEP}]
-		dev-python/matplotlib[${PYTHON_MULTI_USEDEP}]
-		dev-python/numpy[${PYTHON_MULTI_USEDEP}]
-		dev-python/pivy[${PYTHON_MULTI_USEDEP}]
-		dev-python/pyside:2[gui,svg,${PYTHON_MULTI_USEDEP}]
-		dev-python/shiboken:2[${PYTHON_MULTI_USEDEP}]
-		>=sci-libs/libmed-4.0.0[fortran,mpi?,python,${PYTHON_MULTI_USEDEP}]
-		mesh? (
-			netgen? ( >=sci-mathematics/netgen-6.2.1810[mpi?,python,opencascade,${PYTHON_MULTI_USEDEP}] )
-			dev-python/pybind11[${PYTHON_MULTI_USEDEP}]
-		)
-	')
 	dev-qt/designer:5
 	dev-qt/qtconcurrent:5
 	dev-qt/qtcore:5
@@ -91,48 +77,66 @@ RDEPEND="
 	dev-qt/qtwidgets:5
 	dev-qt/qtx11extras:5
 	dev-qt/qtxml:5
-	media-libs/coin[draggers(+),manipulators(+),nodekits(+),simage]
+	>=media-libs/coin-4.0.0[draggers(+),manipulators(+),nodekits(+),simage(+),vrml97(+)]
+	<media-libs/coin-4.0.0a_pre2019
 	media-libs/freetype
 	media-libs/qhull
 	sci-libs/flann[mpi?,openmp]
+	>=sci-libs/med-4.0.0-r1[mpi(+)?,python,${PYTHON_SINGLE_USEDEP}]
 	sci-libs/orocos_kdl:=
-	sci-libs/opencascade:7.3.0[vtk(+)]
+	>=sci-libs/opencascade-7.3.0:*[vtk(+)]
 	sys-libs/zlib
 	virtual/glu
 	virtual/libusb:1
 	virtual/opengl
-	mesh? (
-		sci-libs/hdf5:=[fortran,mpi?,zlib]
-	)
-	mpi? (
-		virtual/mpi[cxx,fortran,threads]
-	)
+	fem? ( >=sci-libs/vtk-6.1.0-r4[boost,mpi?,python,qt5,rendering,${PYTHON_SINGLE_USEDEP}] )
+	mesh? ( sci-libs/hdf5:=[fortran,mpi?,zlib] )
+	mpi? ( virtual/mpi[cxx,fortran,threads] )
+	netgen? ( >=sci-mathematics/netgen-6.2.1810[mpi?,python,opencascade,${PYTHON_SINGLE_USEDEP}] )
 	openscad? ( media-gfx/openscad )
 	pcl? ( >=sci-libs/pcl-1.8.1:=[opengl,openni2(+),qt5(+),vtk(+)] )
+	$(python_gen_cond_dep '
+		!dev-python/pyside:2[gui,svg,${PYTHON_MULTI_USEDEP}]
+		!dev-python/shiboken:2[${PYTHON_MULTI_USEDEP}]
+		dev-libs/boost:=[mpi?,python,threads,${PYTHON_MULTI_USEDEP}]
+		dev-python/matplotlib[${PYTHON_MULTI_USEDEP}]
+		dev-python/numpy[${PYTHON_MULTI_USEDEP}]
+		>=dev-python/pivy-0.6.5[${PYTHON_MULTI_USEDEP}]
+		dev-python/pyside2[gui,svg,${PYTHON_MULTI_USEDEP}]
+		dev-python/shiboken2[${PYTHON_MULTI_USEDEP}]
+		addonmgr? ( dev-python/GitPython[${PYTHON_MULTI_USEDEP}] )
+		mesh? ( dev-python/pybind11[${PYTHON_MULTI_USEDEP}] )
+	')
 "
 DEPEND="${RDEPEND}"
 BDEPEND="
-	$(python_gen_cond_dep '
-		dev-python/pyside-tools:2[${PYTHON_MULTI_USEDEP}]
-	')
 	dev-lang/swig
+	doc? ( app-arch/p7zip )
+	$(python_gen_cond_dep '
+		!dev-python/pyside-tools:2[${PYTHON_MULTI_USEDEP}]
+		dev-python/pyside2-tools[${PYTHON_MULTI_USEDEP}]
+	')
 "
 
 # To get required dependencies: 'grep REQUIRES_MODS CMakeLists.txt'
 # We set the following requirements by default:
-# draft, import, part, plot, qt5, sketcher, start, web.
+# draft, import, part, qt5, sketcher, start, web.
 #
 # Additionally if mesh is set, we auto-enable mesh_part, flat_mesh and smesh
+# Fem actually needs smesh, but as long as we don't have a smesh package, we enable
+# smesh through the mesh USE flag. Note however, the fem<-smesh dependency isn't
+# reflected by the REQUIRES_MODS macro, but at CMakeLists.txt:308.
 REQUIRED_USE="
 	${PYTHON_REQUIRED_USE}
 	arch? ( mesh )
 	debug? ( mesh )
 	drawing? ( spreadsheet )
+	fem? ( mesh )
 	inspection? ( mesh points )
 	netgen? ( fem )
+	openscad? ( mesh )
 	path? ( robot )
-	reverseengineering? ( mesh )
-	ship? ( image )
+	ship? ( image plot )
 	techdraw? ( spreadsheet drawing )
 "
 
@@ -140,12 +144,7 @@ CMAKE_BUILD_TYPE=Release
 
 DOCS=( README.md ChangeLog.txt )
 
-# FIXME: Check the find-Coin.tag patch after updates of media-libs/coin
-#	"${FILESDIR}/smesh-pthread.patch"
-#	"${FILESDIR}/${P}-find-Coin.tag.patch"
 PATCHES=(
-	"${FILESDIR}/${PN}-0.18.2-Fix-to-find-boost_python.patch"
-	"${FILESDIR}/${P}-shiboken.patch"
 )
 
 CHECKREQS_DISK_BUILD="6G"
@@ -161,7 +160,7 @@ src_prepare() {
 	# the upstream provided file doesn't find coin, but cmake ships
 	# a working one, so we use this.
 	rm -f "${S}/cMake/FindCoin3D.cmake"
-	cmake-utils_src_prepare
+	cmake_src_prepare
 }
 
 src_configure() {
@@ -169,7 +168,7 @@ src_configure() {
 		-DBUILD_ADDONMGR=$(usex addonmgr)
 		-DBUILD_ARCH=$(usex arch)
 		-DBUILD_ASSEMBLY=$(usex assembly)
-		-DBUILD_COMPLETE=$(usex complete)
+		-DBUILD_COMPLETE=OFF # deprecated
 		-DBUILD_DRAFT=ON # basic workspace, enable it by default
 		-DBUILD_DRAWING=$(usex drawing)
 		-DBUILD_FEM=$(usex fem)
@@ -187,13 +186,13 @@ src_configure() {
 		-DBUILD_MESH_PART=$(usex mesh)
 		-DBUILD_OPENSCAD=$(usex openscad)
 		-DBUILD_PART=ON # basic workspace, enable it by default
-		-DBUILD_PART_DESIGN=$(usex part_design)
+		-DBUILD_PART_DESIGN=$(usex part-design)
 		-DBUILD_PATH=$(usex path)
-		-DBUILD_PLOT=ON # automagic dep
+		-DBUILD_PLOT=OFF # conflicts with possible external workbench
 		-DBUILD_POINTS=$(usex points)
 		-DBUILD_QT5=ON # OFF means to use Qt4
 		-DBUILD_RAYTRACING=$(usex raytracing)
-		-DBUILD_REVERSEENGINEERING=$(usex reverseengineering)
+		-DBUILD_REVERSEENGINEERING=OFF # currently only an empty sandbox
 		-DBUILD_ROBOT=$(usex robot)
 		-DBUILD_SHIP=$(usex ship)
 		-DBUILD_SHOW=$(usex show)
@@ -216,11 +215,14 @@ src_configure() {
 		-DFREECAD_USE_FREETYPE=ON
 		-DFREECAD_USE_PCL=$(usex pcl)
 		-DFREECAD_USE_PYBIND11=$(usex mesh)
-		# opencascade-7.3.0 sets CASROOT in /etc/env.d/51opencascade
-		-DOCC_INCLUDE_DIR="${CASROOT}"/include/opencascade
-		-DOCC_LIBRARY_DIR="${CASROOT}"/$(get_libdir)
-		-DPYTHON_CONFIG_SUFFIX="-${EPYTHON}"
-		-DPYTHON_SUFFIX="-${EPYTHON}"
+		-DFREECAD_USE_OCC_VARIANT="Official Version"
+		# opencascade sets CASROOT in /etc/env.d/51opencascade
+		#-DOCC_INCLUDE_DIR="${CASROOT}"/include/opencascade
+		#-DOCC_LIBRARY_DIR="${CASROOT}/$(get_libdir)"
+		-DOCCT_CMAKE_FALLBACK=OFF # don't use occt-config which isn't included in opencascade for Gentoo
+		-DPYSIDE2RCCBINARY="${EPREFIX}/usr/bin/rcc"
+		-DPYSIDE2UICBINARY="${EPREFIX}/usr/bin/uic"
+		-DPYTHON_CONFIG_SUFFIX="-${EPYTHON}"	# to use correct python for shiboken
 	)
 
 	if use debug; then
@@ -249,11 +251,11 @@ src_configure() {
 		export F77=mpif77
 	fi
 
-	cmake-utils_src_configure
+	cmake_src_configure
 }
 
 src_install() {
-	cmake-utils_src_install
+	cmake_src_install
 
 	dosym ../$(get_libdir)/${PN}/bin/FreeCAD /usr/bin/freecad
 	dosym ../$(get_libdir)/${PN}/bin/FreeCADCmd /usr/bin/freecadcmd
@@ -283,14 +285,24 @@ src_install() {
 	python_optimize "${ED}"/usr/share/${PN}/data/Mod/ "${ED}"/usr/$(get_libdir)/${PN}{/Ext,/Mod}/
 }
 
-#pkg_postinst() {
-#	xdg_icon_cache_update
-#	xdg_desktop_database_update
-#	xdg_mimeinfo_database_update
-#}
+pkg_postinst() {
+	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
 
-#pkg_postrm() {
-#	xdg_mimeinfo_database_update
-#	xdg_desktop_database_update
-#	xdg_icon_cache_update
-#}
+	if use plot; then
+		einfo "Note: You are enabling the 'plot' USE flag."
+		einfo "This conflicts with the plot workbench which you can load"
+		einfo "via the addon manager! You can only install one of those."
+	fi
+
+	if use ship; then
+		einfo "Note: You are enabling the 'ship' USE flag."
+		einfo "This conflicts with the ship workbench which you can load"
+		einfo "via the addon manager! You can only install one of those."
+	fi
+}
+
+pkg_postrm() {
+	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
+}

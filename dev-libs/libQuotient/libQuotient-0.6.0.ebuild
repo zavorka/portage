@@ -1,7 +1,7 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 DESCRIPTION="A Qt5 library to write cross-platform clients for Matrix"
 HOMEPAGE="https://github.com/qmatrixclient/libqmatrixclient"

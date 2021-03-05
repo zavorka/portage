@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: app-pda/usbmuxd/usbmuxd-9999.ebuild,v 1.0 2013/10/31 17:05:12 srcs Exp $
 
-EAPI=6
+EAPI=7
 inherit autotools git-r3 udev user
 
 DESCRIPTION="USB multiplex daemon for use with Apple iPhone/iPod Touch devices"

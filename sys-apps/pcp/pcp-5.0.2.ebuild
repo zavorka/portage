@@ -2,8 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=6
-PYTHON_COMPAT=(python{2_7,3_{5,6,7,8}})
+EAPI=7
+PYTHON_COMPAT=( python3_{7..9} )
 inherit user eutils python-any-r1
 
 DESCRIPTION="Performance Co-Pilot, system performance and analysis framework"

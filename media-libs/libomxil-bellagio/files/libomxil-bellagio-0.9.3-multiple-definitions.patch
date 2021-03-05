@@ -1,0 +1,50 @@
+From 63b929b6eccd0e80ca71aab4d397a69e0114e788 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Thu, 8 Oct 2020 02:58:00 +0200
+Subject: [PATCH] fix multiple definitions
+
+---
+ src/omx_reference_resource_manager.c |  1 +
+ src/omx_reference_resource_manager.h | 14 ++++++++------
+ 2 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/src/omx_reference_resource_manager.c b/src/omx_reference_resource_manager.c
+index ee7766b..b0acb98 100644
+--- a/src/omx_reference_resource_manager.c
++++ b/src/omx_reference_resource_manager.c
+@@ -26,6 +26,7 @@
+ */
+ 
+ #include <string.h>
++#define RM_EXTERN
+ #include "omx_reference_resource_manager.h"
+ #include "base/omx_base_component.h"
+ #include "queue.h"
+diff --git a/src/omx_reference_resource_manager.h b/src/omx_reference_resource_manager.h
+index ba8dad9..91b38d5 100644
+--- a/src/omx_reference_resource_manager.h
++++ b/src/omx_reference_resource_manager.h
+@@ -48,12 +48,14 @@ struct NameIndexType {
+ 	int max_components;
+ };
+ 
+-
+-int globalIndex;
+-NameIndexType *listOfcomponentRegistered;
+-ComponentListType **globalComponentList;
+-ComponentListType **globalWaitingComponentList;
+-
++#ifndef RM_EXTERN
++#define RM_EXTERN extern
++#endif
++RM_EXTERN int globalIndex;
++RM_EXTERN NameIndexType *listOfcomponentRegistered;
++RM_EXTERN ComponentListType **globalComponentList;
++RM_EXTERN ComponentListType **globalWaitingComponentList;
++#undef RM_EXTERN
+ OMX_ERRORTYPE RM_RegisterComponent(char *name, int max_components);
+ OMX_ERRORTYPE addElemToList(ComponentListType **list, OMX_COMPONENTTYPE *openmaxStandComp, int index, OMX_BOOL bIsWaiting);
+ OMX_ERRORTYPE removeElemFromList(ComponentListType **list, OMX_COMPONENTTYPE *openmaxStandComp);
+-- 
+2.28.0
+

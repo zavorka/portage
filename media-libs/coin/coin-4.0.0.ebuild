@@ -10,13 +10,7 @@ MY_P=${P/c/C}
 DESCRIPTION="A high-level 3D graphics toolkit, fully compatible with SGI Open Inventor 2.1"
 HOMEPAGE="https://bitbucket.org/Coin3D/coin/wiki/Home"
 
-COIN_SRC_URI="https://bitbucket.org/Coin3D/coin"
-COIN_REV="6enkw"
-GENERALMSVCGENERATION_SRC_URI="https://bitbucket.org/Coin3D/generalmsvcgeneration"
-GENERALMSVCGENERATION_REV="d12bf6cbb77c"
-
-SRC_URI="${GENERALMSVCGENERATION_SRC_URI}/get/${GENERALMSVCGENERATION_REV}.zip -> coin-generalmsvcgeneration.zip
-	${COIN_SRC_URI}/downloads/${P}-src.zip -> ${P}.zip"
+SRC_URI="https://github.com/coin3d/coin/releases/download/${MY_P}/${P}-src.tar.gz"
 
 LICENSE="|| ( GPL-2 PEL )"
 KEYWORDS="~amd64 ~x86"
@@ -60,7 +54,7 @@ REQUIRED_USE="
 	qthelp? ( doc )
 "
 
-S="${WORKDIR}/${MY_P}"
+S="${WORKDIR}/${PN}"
 
 PATCHES=(
 	"${FILESDIR}"/${P}-gcc-7.patch
@@ -71,14 +65,6 @@ DOCS=(
 	AUTHORS FAQ FAQ.legal NEWS README RELNOTES THANKS
 	docs/{HACKING,oiki-launch.txt}
 )
-
-src_unpack() {
-	default
-	pushd "${WORKDIR}" > /dev/null || die
-	mv Coin3D-generalmsvcgeneration-${GENERALMSVCGENERATION_REV} generalmsvcgeneration || die
-	mv coin-${COIN_REV} ${MY_P} || die
-	popd > /dev/null || die
-}
 
 src_configure() {
 	local mycmakeargs=(
@@ -107,13 +93,6 @@ src_configure() {
 	)
 
 	cmake-utils_src_configure
-}
-
-src_install() {
-	cmake-utils_src_install
-	pushd "${ED%/}"/usr/share/doc > /dev/null || die
-	#mv "${PF}" $(ver_cut 1-5 "${PF}") || die
-	popd > /dev/null || die
 }
 
 src_test() {

@@ -1,0 +1,76 @@
+From 18723e8c1084b98f05138dc2ed4d01e704f978a3 Mon Sep 17 00:00:00 2001
+From: Joey Smith <joeysmith@gmail.com>
+Date: Sat, 25 Aug 2018 13:44:18 -0600
+Subject: [PATCH 1/2] Added `K` command
+
+... as an opposite to the opposite of `D`, it
+*keeps* the numbered block, deleting the rest
+---
+ src/bbe.c     | 3 ++-
+ src/execute.c | 8 ++++++++
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/src/bbe.c b/src/bbe.c
+index a91e4be..528cc20 100644
+--- a/src/bbe.c
++++ b/src/bbe.c
+@@ -72,7 +72,7 @@ char *convert_strings[] = {
+           "",
+ };
+ /* commands to be executed at start of buffer */
+-#define BLOCK_START_COMMANDS "DIJLFBN>"
++#define BLOCK_START_COMMANDS "KDIJLFBN>"
+ 
+ /* commands to be executed for each byte  */
+ #define BYTE_COMMANDS "acdirsywjpl&|^~ufx"
+@@ -450,6 +450,7 @@ parse_command(char *command_string)
+     switch(new->letter)
+     {
+         case 'D':
++        case 'K':
+             if(i < 1 || i > 2 || strlen(token[0]) > 1) panic("Error in command",command_string,NULL);
+             if(i == 2) 
+             {
+diff --git a/src/execute.c b/src/execute.c
+index 826bb25..1848e44 100644
+--- a/src/execute.c
++++ b/src/execute.c
+@@ -68,6 +68,7 @@ byte_to_string(unsigned char byte,char format)
+             sprintf(string,"x%02x",(int) byte);
+             break;
+         case 'D':
++        case 'K':
+             sprintf(string,"%3d",(int) byte);
+             break;
+         case 'O':
+@@ -104,6 +105,7 @@ off_t_to_string(off_t number,char format)
+              sprintf(string,"x%llx",(long long) number);
+              break;
+         case 'D':
++        case 'K':
+              sprintf(string,"%lld",(long long) number);
+              break;
+         case 'O':
+@@ -163,6 +165,9 @@ execute_commands(struct command_list *c)
+             case 'D':
+                 if(c->offset == in_buffer.block_num || c->offset == 0) delete_this_block = 1;
+                 break;
++            case 'K':
++                if(c->offset == in_buffer.block_num || c->offset == 0) delete_this_block = 0;
++                break;
+             case 'i':
+                 if(c->offset == in_buffer.block_offset && !c->rpos) 
+                 {
+@@ -702,6 +707,9 @@ execute_program(struct commands *commands)
+     {
+         reset_rpos(commands->byte);
+         delete_this_block = 0;
++        if (commands->block_start->letter == 'K') {
++           delete_this_block = 1;
++        }
+         out_buffer.block_offset = 0;
+         skip_this_block = 0;
+         if(w_commands_block_num) open_w_files(in_buffer.block_num);
+-- 
+2.30.0
+
