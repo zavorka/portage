@@ -1,0 +1,25 @@
+From cf40fd8c8e7971cbcccbe6c5e1e43380b13d1960 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Mon, 12 Apr 2021 22:37:11 +0200
+Subject: [PATCH] install
+
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 8e70418..c553c39 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -172,7 +172,7 @@ install-scsh: scsh
+ 
+ install-scsh-image: install-scsh
+ 	$(srcdir)/build/build-image.sh $(srcdir) \
+-		"$(LIB)/" '$(DESTDIR)$(LIB)/scsh.image' '$(SCHEME48) -h 0' '$(LOADS)'
++		"$(DESTDIR)$(LIB)/" '$(DESTDIR)$(LIB)/scsh.image' '$(SCHEME48) -h 0' '$(LOADS)'
+ 
+ clean:
+ 	rm -rf c/*.o c/*.so c/*.dSYM *.sexpr scsh.image scsh go *.dSYM
+-- 
+2.31.1
+

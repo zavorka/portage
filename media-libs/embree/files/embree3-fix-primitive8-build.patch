@@ -1,0 +1,40 @@
+From 03a89495cef9ad20e88f7609179e97b47afab9a0 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Mon, 5 Apr 2021 20:37:32 +0200
+Subject: [PATCH] fix primitive8 build
+
+---
+ kernels/CMakeLists.txt | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/kernels/CMakeLists.txt b/kernels/CMakeLists.txt
+index ca4bb76..d184a63 100644
+--- a/kernels/CMakeLists.txt
++++ b/kernels/CMakeLists.txt
+@@ -111,12 +111,6 @@ MACRO(embree_files TARGET ISA)
+     geometry/curve_intersector_virtual_8i_mb.cpp
+     bvh/bvh_intersector1_bvh4.cpp)
+ 
+-  IF (${ISA_LOWEST_AVX})
+-    IF (${ISA} EQUAL ${ISA_LOWEST_AVX})
+-      LIST(APPEND ${TARGET} geometry/primitive8.cpp)
+-    ENDIF()
+-  ENDIF() 
+-
+   IF (${ISA} EQUAL ${SSE2} OR ${ISA} EQUAL ${AVX} OR ${ISA} EQUAL ${AVX2} OR ${ISA} EQUAL ${AVX512} OR ${ISA_LOWEST} EQUAL ${ISA})
+     
+     LIST(APPEND ${TARGET}
+@@ -152,7 +146,9 @@ MACRO(embree_files TARGET ISA)
+   ENDIF()
+     
+   IF (${ISA} GREATER ${SSE42})
+-    LIST(APPEND ${TARGET} bvh/bvh_intersector1_bvh8.cpp)
++    LIST(APPEND ${TARGET}
++      bvh/bvh_intersector1_bvh8.cpp
++      geometry/primitive8.cpp)
+   ENDIF()
+ 
+   IF (${ISA} EQUAL ${AVX})
+-- 
+2.31.1
+

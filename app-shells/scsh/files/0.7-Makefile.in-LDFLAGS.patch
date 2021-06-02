@@ -1,0 +1,11 @@
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -132,7 +132,7 @@ go: c/scsh-tramp.c
+ 	$(srcdir)/c/scsh-tramp.c
+ 
+ scsh: c/scsh-tramp.c
+-	$(CC) -o $@ $(CFLAGS) \
++	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) \
+ 	-DVM=\"$(SCHEME48VM)\" \
+ 	-DIMAGE=\"$(LIB)/scsh.image\" \
+ 	$(srcdir)/c/scsh-tramp.c

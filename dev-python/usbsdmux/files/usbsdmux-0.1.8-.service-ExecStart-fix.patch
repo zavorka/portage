@@ -1,0 +1,25 @@
+From f41345e164e73fb30b1cc4059093b52522e5c0f6 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Wed, 7 Apr 2021 19:44:12 +0200
+Subject: [PATCH] .service ExecStart fix
+
+---
+ contrib/systemd/usbsdmux.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/contrib/systemd/usbsdmux.service b/contrib/systemd/usbsdmux.service
+index 3c2d627..bb07924 100644
+--- a/contrib/systemd/usbsdmux.service
++++ b/contrib/systemd/usbsdmux.service
+@@ -5,7 +5,7 @@ Requires=usbsdmux.socket
+ 
+ [Service]
+ Type=simple
+-ExecStart=/path/to/usb-sd-mux/.venv/bin/usbsdmux-service
++ExecStart=/usr/bin/usbsdmux-service
+ 
+ [Install]
+ WantedBy=multi-user.target
+-- 
+2.31.1
+

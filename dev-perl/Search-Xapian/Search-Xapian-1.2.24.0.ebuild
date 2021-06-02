@@ -4,9 +4,9 @@
 EAPI=7
 
 DIST_AUTHOR=OLLY
-inherit perl-module toolchain-funcs versionator
+inherit perl-module toolchain-funcs
 
-VERSION=$(get_version_component_range 1-3)
+VERSION=$(ver_cut 1-3)
 
 SRC_URI+=" http://oligarchy.co.uk/xapian/${VERSION}/${P}.tar.gz"
 DESCRIPTION="Perl XS frontend to the Xapian C++ search library"

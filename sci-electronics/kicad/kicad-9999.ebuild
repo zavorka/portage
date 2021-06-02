@@ -59,26 +59,11 @@ RDEPEND="${COMMON_DEPEND}
 BDEPEND="doc? ( app-doc/doxygen )"
 CHECKREQS_DISK_BUILD="800M"
 
-PATCHES=(
-	"${FILESDIR}/${P}-metainfo.patch"
-)
-
 pkg_setup() {
 	use python && python-single-r1_pkg_setup
 	use openmp && tc-check-openmp
 	setup-wxwidgets
 	check-reqs_pkg_setup
-}
-
-src_unpack() {
-	git-r3_src_unpack
-	# For the metainfo patch to work the kicad.appdata.xml has to be moved to
-	# avoid QA issue.  This is needed because /usr/share/appdata location is
-	# deprecated, it should not be used anymore by new software.
-	# Appdata/Metainfo files should be installed into /usr/share/metainfo
-	# directory. as per
-	# https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html
-	mv "${S}/resources/linux/appdata" "${S}/resources/linux/metainfo" || die "Appdata move failed"
 }
 
 src_configure() {

@@ -1,0 +1,25 @@
+From 377ff08dca749bf641a65a45d3e9a30a80f949bf Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Mon, 5 Apr 2021 22:49:36 +0200
+Subject: [PATCH] boost-python
+
+---
+ cmake/Dependencies.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index 20be89a..b20fdde 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -58,7 +58,7 @@ set(Boost_MINIMUM_VERSION       "1.44.0")
+ 
+ set(Boost_ADDITIONAL_VERSIONS "1.47.0" "1.46.1" "1.46" "1.46.0" "1.45" "1.45.0" "1.44" "1.44.0")
+ 
+-set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system python chrono)
++set(LUXRAYS_BOOST_COMPONENTS thread program_options filesystem serialization iostreams regex system ${EPYTHON} chrono)
+ find_package(Boost ${Boost_MINIMUM_VERSION} COMPONENTS ${LUXRAYS_BOOST_COMPONENTS})
+ if (NOT Boost_FOUND)
+         # Try again with the other type of libs
+-- 
+2.31.1
+

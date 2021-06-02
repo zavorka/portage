@@ -1,0 +1,60 @@
+net_tstamp.h needs clockid_t to be defined, so must include
+<sys/types.h> before including <linux/net_tstamp.h>
+
+
+diff --git a/clock.c b/clock.c
+index e545a9b..8f757d2 100644
+--- a/clock.c
++++ b/clock.c
+@@ -18,6 +18,7 @@
+  */
+ #include <errno.h>
+ #include <time.h>
++#include <sys/types.h>
+ #include <linux/net_tstamp.h>
+ #include <poll.h>
+ #include <stdlib.h>
+diff --git a/hwstamp_ctl.c b/hwstamp_ctl.c
+index 0d21843..fad247f 100644
+--- a/hwstamp_ctl.c
++++ b/hwstamp_ctl.c
+@@ -23,6 +23,7 @@
+ #include <string.h>
+ #include <sys/ioctl.h>
+ #include <unistd.h>
++#include <sys/types.h>
+ 
+ #include <arpa/inet.h>
+ #include <linux/net_tstamp.h>
+diff --git a/sk.c b/sk.c
+index 8be0708..86c4217 100644
+--- a/sk.c
++++ b/sk.c
+@@ -27,6 +27,7 @@
+ #include <string.h>
+ #include <sys/ioctl.h>
+ #include <unistd.h>
++#include <sys/types.h>
+ #include <ifaddrs.h>
+ #include <stdlib.h>
+ #include <poll.h>
+diff --git a/timemaster.c b/timemaster.c
+index 616a99a..6b5daa6 100644
+--- a/timemaster.c
++++ b/timemaster.c
+@@ -23,7 +23,6 @@
+ #include <libgen.h>
+ #include <limits.h>
+ #include <time.h>
+-#include <linux/net_tstamp.h>
+ #include <net/if.h>
+ #include <signal.h>
+ #include <spawn.h>
+@@ -35,6 +34,7 @@
+ #include <sys/types.h>
+ #include <sys/wait.h>
+ #include <unistd.h>
++#include <linux/net_tstamp.h>
+ 
+ #include "print.h"
+ #include "rtnl.h"

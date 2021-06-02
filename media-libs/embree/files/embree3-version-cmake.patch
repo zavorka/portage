@@ -1,0 +1,40 @@
+From 6dd7c4edbd14f67adc918d42b61e43164ec655ae Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Mon, 5 Apr 2021 22:23:56 +0200
+Subject: [PATCH] version-cmake
+
+---
+ common/cmake/package.cmake       | 3 ++-
+ common/cmake/embree-config.cmake | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/common/cmake/package.cmake b/common/cmake/package.cmake
+index 5429436..ebdc8d3 100644
+--- a/common/cmake/package.cmake
++++ b/common/cmake/package.cmake
+@@ -124,7 +124,8 @@ ENDIF()
+ #ENDIF()
+ 
+ CONFIGURE_FILE(common/cmake/embree-config.cmake embree-config-install.cmake @ONLY)
+-CONFIGURE_FILE(common/cmake/embree-config-version.cmake embree-config-version.cmake @ONLY)
++include(CMakePackageConfigHelpers)
++write_basic_package_version_file(embree-config-version.cmake VERSION ${EMBREE_VERSION} COMPATIBILITY AnyNewerVersion)
+ # create a config file for the build directory
+ CONFIGURE_FILE(common/cmake/embree-config-builddir.cmake embree-config.cmake @ONLY)
+ 
+diff --git a/common/cmake/embree-config.cmake b/common/cmake/embree-config.cmake
+index 2c08cd7..8d56372 100644
+--- a/common/cmake/embree-config.cmake
++++ b/common/cmake/embree-config.cmake
+@@ -4,6 +4,8 @@
+ SET(EMBREE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/@EMBREE_RELATIVE_ROOT_DIR@)
+ GET_FILENAME_COMPONENT(EMBREE_ROOT_DIR "${EMBREE_ROOT_DIR}" ABSOLUTE)
+ 
++SET(EMBREE_FOUND 1)
++
+ SET(EMBREE_INCLUDE_DIRS ${EMBREE_ROOT_DIR}/@CMAKE_INSTALL_INCLUDEDIR@)
+ SET(EMBREE_LIBRARY ${EMBREE_ROOT_DIR}/@CMAKE_INSTALL_LIBDIR@/@EMBREE_LIBRARY_FULLNAME@)
+ SET(EMBREE_LIBRARIES ${EMBREE_LIBRARY})
+-- 
+2.31.1
+
