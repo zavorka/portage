@@ -1,0 +1,84 @@
+From 0066ccdd26b8bebf986e7dd529bafe4d9404cf9b Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Thu, 1 Jul 2021 12:23:39 +0200
+Subject: [PATCH] bytes
+
+---
+ querier/__init__.py |  6 +++---
+ querier/packets.py  | 12 +++++-------
+ 2 files changed, 8 insertions(+), 10 deletions(-)
+
+diff --git a/querier/__init__.py b/querier/__init__.py
+index bcd9beb..b9b112e 100644
+--- a/querier/__init__.py
++++ b/querier/__init__.py
+@@ -65,7 +65,7 @@ class Querier:
+         ip.ttl = 1
+         ip.src = self.source_address
+         ip.dst = all_routers
+-        ip.data = igmp
++        ip.data = igmp.data
+ 
+     def run(self):
+         syslog.syslog('Querier starting. %s' % self.source_address)
+@@ -86,7 +86,7 @@ class Querier:
+ 
+             elapsed = self.listener.elapsed()
+             if self.elected:
+-                self.socket.sendto(str(self.packet), (all_routers, 0))
++                self.socket.sendto(self.packet.data, (all_routers, 0))
+                 if elapsed < self.interval:
+                     self.elected = False
+                     syslog.syslog('Lost querier election. Pausing. %s'
+@@ -137,7 +137,7 @@ class QueryListener:
+             except socket.timeout:
+                 continue
+ 
+-            if ord(data[20]) == 17:  # make sure we got a query packet
++            if data[20] == 17:  # make sure we got a query packet
+                 if self._ip_as_int(address[0]) < self.address:
+                     self.lock.acquire()
+                     self._timestamp = time.time()
+diff --git a/querier/packets.py b/querier/packets.py
+index b0f9974..47818ba 100644
+--- a/querier/packets.py
++++ b/querier/packets.py
+@@ -38,17 +38,13 @@ class Packet(object):
+     """
+     Base class for internet packets.
+     """
+-    _data = ''
++    _data = b''
+     def __init__(self):
+         self.format = '!'+''.join([self.formats[f]
+                                    for f in self.fields])
+         self.length = self.hdr_length = struct.calcsize(self.format)
+         self.length = LENGTH(self.length)
+ 
+-    def __str__(self):
+-        self.compute_checksum()
+-        return self.header() + self._data
+-
+     def header(self):
+         values = [getattr(self, field) for field in self.fields]
+         return struct.pack(self.format, *values)
+@@ -65,12 +61,14 @@ class Packet(object):
+ 
+     @property
+     def data(self):
++        self.compute_checksum()
+         return self._data
++
+     @data.setter
+     def data(self, data):
+-        self._data = str(data)
++        self._data = data
+         self.length = LENGTH(self.hdr_length + len(self._data))
+-        
++
+ class IGMPv2Packet(Packet):
+     fields = ['_type', '_max_response_time', 'checksum', '_group']
+     formats = {'_type':'B', '_max_response_time':'B', 'checksum':'H',
+-- 
+2.32.0
+

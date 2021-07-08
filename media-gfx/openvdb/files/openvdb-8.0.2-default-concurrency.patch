@@ -1,0 +1,41 @@
+From 6c12cf3e0a4e1077ad561a8c16a917a6b1b721b8 Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Thu, 3 Jun 2021 20:48:52 +0200
+Subject: [PATCH] replace deprecated
+ tbb::task_scheduler_init::default_num_threads for
+ tbb::info::default_concurrency
+
+Signed-off-by: Roman Beranek <roman.beranek@prusa3d.com>
+---
+ openvdb/openvdb/tools/MeshToVolume.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/openvdb/openvdb/tools/MeshToVolume.h b/openvdb/openvdb/tools/MeshToVolume.h
+index 6643c8f0..eb30ff23 100644
+--- a/openvdb/openvdb/tools/MeshToVolume.h
++++ b/openvdb/openvdb/tools/MeshToVolume.h
+@@ -29,11 +29,11 @@
+ 
+ #include <tbb/blocked_range.h>
+ #include <tbb/enumerable_thread_specific.h>
++#include <tbb/global_control.h>
+ #include <tbb/parallel_for.h>
+ #include <tbb/parallel_reduce.h>
+ #include <tbb/partitioner.h>
+ #include <tbb/task_group.h>
+-#include <tbb/task_scheduler_init.h>
+ 
+ #include <algorithm> // for std::sort()
+ #include <cmath> // for std::isfinite(), std::isnan()
+@@ -1132,7 +1132,7 @@ inline void
+ fillArray(ValueType* array, const ValueType val, const size_t length)
+ {
+     const auto grainSize = std::max<size_t>(
+-        length / tbb::task_scheduler_init::default_num_threads(), 1024);
++        length / tbb::global_control::active_value(tbb::global_control::max_allowed_parallelism), 1024);
+     const tbb::blocked_range<size_t> range(0, length, grainSize);
+     tbb::parallel_for(range, FillArray<ValueType>(array, val), tbb::simple_partitioner());
+ }
+-- 
+2.31.1
+

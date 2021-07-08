@@ -145,6 +145,9 @@ CMAKE_BUILD_TYPE=Release
 DOCS=( README.md ChangeLog.txt )
 
 PATCHES=(
+	"${FILESDIR}"/${PN}-0.19_pre20201231-0003-Gentoo-specific-don-t-check-vcs.patch
+	"${FILESDIR}"/${PN}-0.19.1-0001-Gentoo-specific-Remove-ccache-usage.patch
+	"${FILESDIR}"/${P}-epython.patch
 )
 
 CHECKREQS_DISK_BUILD="6G"

@@ -1,0 +1,34 @@
+From 21fe1a11e12ba8ba0200ff671bce6042ca423f94 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Sat, 5 Jun 2021 20:04:48 +0200
+Subject: [PATCH] epython
+
+---
+ cMake/FreeCAD_Helpers/SetupPython.cmake | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/cMake/FreeCAD_Helpers/SetupPython.cmake b/cMake/FreeCAD_Helpers/SetupPython.cmake
+index ffeefe25e9..f5b4ddbb2a 100644
+--- a/cMake/FreeCAD_Helpers/SetupPython.cmake
++++ b/cMake/FreeCAD_Helpers/SetupPython.cmake
+@@ -114,6 +114,8 @@ macro(SetupPython)
+ 
+     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT BUILD_WITH_CONDA)
+ 
++    string(REPLACE "python" "" EPYTHON_VERSION $ENV{EPYTHON})
++
+     if(${CMAKE_VERSION} VERSION_LESS "3.12")
+         set(Python_ADDITIONAL_VERSIONS ${Python_ADDITIONAL_VERSIONS} "3.10" "3.9" "3.8" "3.7" "3.6")
+         find_package(PythonInterp REQUIRED)
+@@ -140,7 +142,7 @@ macro(SetupPython)
+         set(Python3_VERSION_PATCH ${PYTHON_VERSION_PATCH})
+         set(Python3_Interpreter_FOUND ${PYTHONINTERP_FOUND})
+     else()
+-        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
++        find_package(Python3 ${EPYTHON_VERSION} EXACT COMPONENTS Interpreter Development REQUIRED)
+ 
+         # For backwards compatibility with old CMake scripts
+         set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+-- 
+2.31.1
+

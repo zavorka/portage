@@ -1,0 +1,60 @@
+From acef0a338827c94c043e701fd4d25ccc1185a74a Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Thu, 24 Jun 2021 02:43:14 +0200
+Subject: [PATCH] CK_NSS_GetFIPSStatus
+
+---
+ configure.ac              | 15 +++++++++++----
+ lib/_pkcs11h-crypto-nss.c |  4 ++++
+ 2 files changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 0f63abd..de3faf6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -497,16 +497,23 @@ else
+ fi
+ 
+ AC_MSG_CHECKING([NSS crypto engine])
+-if test "${enable_crypto_engine_nss}" = "yes"; then
+-	if test "${have_nss}" = "yes"; then
++if test "${enable_crypto_engine_nss}" = "yes" -a "${have_nss}" = "yes"; then
++	old_CFLAGS="${CFLAGS}"
++	CFLAGS="${NSS_CFLAGS} -Werror=incompatible-pointer-types"
++	AC_COMPILE_IFELSE([[#include <cert.h>
++			    CK_RV f(CK_SESSION_HANDLE, CK_OBJECT_HANDLE, CK_ULONG, CK_ULONG*) { }
++			    CK_NSS_GetFIPSStatus fp = f;]],
++			    [fips_fp_type_matches="yes"],
++			    [fips_fp_type_matches="no"])
++	if test "${fips_fp_type_matches}" = "yes"; then
+ 		AC_MSG_RESULT([yes])
+ 		AC_DEFINE([ENABLE_PKCS11H_ENGINE_NSS], [1], [Enable NSS crypto engine])
+-		CFLAGS="${CFLAGS} ${NSS_CFLAGS}"
++		CFLAGS="${old_CFLAGS} ${NSS_CFLAGS}"
+ 		LIBS="${LIBS} ${NSS_LIBS}"
+ 		crypto_engine=1
+ 		PKCS11H_FEATURES="${PKCS11H_FEATURES} engine_crypto_nss"
+ 	else
+-		AC_MSG_RESULT([no])
++		AC_MSG_ERROR([The signature of CK_NSS_GetFIPSStatus must have changed])
+ 	fi
+ else
+ 	AC_MSG_RESULT([no])
+diff --git a/lib/_pkcs11h-crypto-nss.c b/lib/_pkcs11h-crypto-nss.c
+index 4b70e82..f50aefd 100644
+--- a/lib/_pkcs11h-crypto-nss.c
++++ b/lib/_pkcs11h-crypto-nss.c
+@@ -54,6 +54,10 @@
+ 
+ #if defined(ENABLE_PKCS11H_ENGINE_NSS)
+ #define _PKCS11T_H_ /* required so no conflict with ours */
++typedef CK_RV (*CK_NSS_GetFIPSStatus)(CK_SESSION_HANDLE hSession,
++                                      CK_OBJECT_HANDLE hObject,
++                                      CK_ULONG ulOperationType,
++                                      CK_ULONG *pulFIPSStatus);
+ #include <nss.h>
+ #include <cert.h>
+ 
+-- 
+2.32.0
+

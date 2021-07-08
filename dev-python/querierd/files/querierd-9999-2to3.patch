@@ -1,0 +1,42 @@
+From 4ff8d849aa45a1d300d1f2c2dcf154e60f0fb885 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Thu, 1 Jul 2021 11:43:04 +0200
+Subject: [PATCH] 2to3
+
+---
+ querier/service.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/querier/service.py b/querier/service.py
+index c3483a9..0efa680 100644
+--- a/querier/service.py
++++ b/querier/service.py
+@@ -61,7 +61,7 @@ def main():
+     args = parser.parse_args()
+ 
+     if os.getuid() != 0:
+-        print 'You must be root to run a querier.'
++        print('You must be root to run a querier.')
+         sys.exit(1)
+ 
+     debug = args.debug
+@@ -75,14 +75,14 @@ def main():
+             for address in addresses:
+                 if address not in processes:
+                     if debug:
+-                        print('adding new querier: %s' % address)
++                        print(('adding new querier: %s' % address))
+                     processes[address] = QuerierInstance(address, interval)
+ 
+             removed = []
+             for proc in processes:
+                 if proc not in addresses:
+                     if debug:
+-                        print('stopping querier: %s' % proc)
++                        print(('stopping querier: %s' % proc))
+                     processes[proc].stop()
+                     removed.append(proc)
+             for proc in removed:
+-- 
+2.32.0
+

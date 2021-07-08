@@ -1,0 +1,36 @@
+From 821b3108ebfdb0cefd5d5893d8033d5fabd5b2f3 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Sun, 27 Jun 2021 01:01:40 +0200
+Subject: [PATCH] pybind11 python version
+
+---
+ CMakeLists.txt | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 78475521d9..dc94115335 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -771,15 +771,16 @@ set( INC_AFTER
+ find_package( SWIG 3.0 REQUIRED )
+ include( ${SWIG_USE_FILE} )
+ 
++set( PythonInterp_FIND_VERSION 3.6 )
++set( PythonLibs_FIND_VERSION 3.6 )
++set( PythonLibsNew_FIND_VERSION ${PythonLibs_FIND_VERSION} )
++
+ # pybind11 is header-only, so include the subdir
+ add_subdirectory(thirdparty/pybind11)
+ 
+ # Make sure that we get our pybind11 and not the system pybind11 (ours is patched to work with wx)
+ include_directories( BEFORE SYSTEM ${PYBIND11_INCLUDE_DIR} )
+ 
+-set( PythonInterp_FIND_VERSION 3.6 )
+-set( PythonLibs_FIND_VERSION 3.6 )
+-
+ find_package( PythonInterp ${PythonInterp_FIND_VERSION} )
+ 
+ check_find_package_result( PYTHONINTERP_FOUND "Python Interpreter" )
+-- 
+2.32.0
+
