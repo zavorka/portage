@@ -22,7 +22,7 @@ HOMEPAGE="https://www.kicad-pcb.org"
 
 LICENSE="GPL-2+ GPL-3+ Boost-1.0"
 SLOT="0"
-IUSE="doc examples +ngspice occ +oce openmp +python"
+IUSE="doc examples github +ngspice occ oce openmp +python"
 
 REQUIRED_USE="
 	python? ( ${PYTHON_REQUIRED_USE} )
@@ -30,7 +30,7 @@ REQUIRED_USE="
 "
 
 COMMON_DEPEND="
-	>=dev-libs/boost-1.61:=[context,nls,threads]
+	>=dev-libs/boost-1.61:=[context,nls]
 	media-libs/freeglut
 	media-libs/glew:0=
 	>=media-libs/glm-0.9.9.1
@@ -38,14 +38,14 @@ COMMON_DEPEND="
 	>=x11-libs/cairo-1.8.8:=
 	>=x11-libs/pixman-0.30
 	x11-libs/wxGTK:${WX_GTK_VER}[X,opengl]
+	github? ( net-misc/curl:=[ssl] )
 	ngspice? (
 		>sci-electronics/ngspice-27[shared]
 	)
-	occ? ( >=sci-libs/opencascade-6.8.0:= )
-	oce? ( sci-libs/oce )
+	occ? ( >=sci-libs/opencascade-6.8.0:=[vtk(+)] )
 	python? (
 		$(python_gen_cond_dep '
-			>=dev-libs/boost-1.61:=[context,nls,threads,python,${PYTHON_MULTI_USEDEP}]
+			>=dev-libs/boost-1.61:=[context,nls,python,${PYTHON_MULTI_USEDEP}]
 			dev-python/wxpython:4.0[${PYTHON_MULTI_USEDEP}]
 		')
 		${PYTHON_DEPS}
@@ -74,6 +74,7 @@ src_configure() {
 	local mycmakeargs=(
 		-DKICAD_DOCS="${EPREFIX}/usr/share/doc/${PF}"
 		-DKICAD_HELP="${EPREFIX}/usr/share/doc/${PN}-doc-${PV}"
+		-DBUILD_GITHUB_PLUGIN="$(usex github)"
 		-DKICAD_SCRIPTING="$(usex python)"
 		-DKICAD_SCRIPTING_MODULES="$(usex python)"
 		-DKICAD_SCRIPTING_WXPYTHON="$(usex python)"
@@ -91,6 +92,7 @@ src_configure() {
 		-DPYTHON_EXECUTABLE="${PYTHON}"
 		-DPYTHON_INCLUDE_DIR="$(python_get_includedir)"
 		-DPYTHON_LIBRARY="$(python_get_library_path)"
+		-DPYTHON_SITE_PACKAGE_PATH="$(python_get_sitedir)"
 	)
 	use occ && mycmakeargs+=(
 		-DOCC_INCLUDE_DIR="${CASROOT}"/include/opencascade

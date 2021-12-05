@@ -1,0 +1,25 @@
+From 0b7417a3fb51079abe3c20eea3f67eef223c8804 Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Tue, 17 Aug 2021 04:52:32 +0200
+Subject: [PATCH] ck2 revert
+
+---
+ src/daemon/LogindDBusTypes.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/daemon/LogindDBusTypes.cpp b/src/daemon/LogindDBusTypes.cpp
+index 011bb7f..a9f485d 100644
+--- a/src/daemon/LogindDBusTypes.cpp
++++ b/src/daemon/LogindDBusTypes.cpp
+@@ -60,7 +60,7 @@ LogindPathInternal::LogindPathInternal()
+ 
+     if (QDBusConnection::systemBus().interface()->isServiceRegistered(QStringLiteral("org.freedesktop.ConsoleKit"))) {
+         qDebug() << "Console kit interface found";
+-        available = true;
++        available = false;
+         serviceName = QStringLiteral("org.freedesktop.ConsoleKit");
+         managerPath = QStringLiteral("/org/freedesktop/ConsoleKit/Manager");
+         managerIfaceName = QStringLiteral("org.freedesktop.ConsoleKit.Manager"); //note this doesn't match logind
+-- 
+2.32.0
+

@@ -1,0 +1,24 @@
+From bf60733376c924ecf6bc09c42756d2371c491b49 Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Wed, 18 Aug 2021 14:28:40 +0200
+Subject: [PATCH] include system headers
+
+---
+ build.rs | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/build.rs b/build.rs
+index bc97e83..a535b8b 100644
+--- a/build.rs
++++ b/build.rs
+@@ -68,7 +68,6 @@ fn main() {
+     println!("cargo:rerun-if-changed=lib/encode_video.c");
+     let mut cc_video = cc::Build::new();
+     cc_video.file("lib/encode_video.c");
+-    cc_video.include("deps/dist/include");
+     if ["linux", "windows"].contains(&target_os.as_str()) {
+         cc_video.define("HAS_NVENC", None);
+     }
+-- 
+2.32.0
+

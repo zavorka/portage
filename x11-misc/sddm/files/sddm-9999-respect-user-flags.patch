@@ -1,0 +1,39 @@
+From c11a4bb1e85154a9596f1f6ea52f4afbb172605f Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Tue, 17 Aug 2021 04:28:37 +0200
+Subject: [PATCH] respect user flags
+
+---
+ CMakeLists.txt | 16 ----------------
+ 1 file changed, 16 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6936b31..e4c9eb1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -42,22 +42,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH};${ECM_MODU
+ # Definitions
+ add_definitions(-Wall -std=c++11 -DQT_NO_CAST_FROM_ASCII -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_FOREACH)
+ 
+-# Default build type
+-if(NOT CMAKE_BUILD_TYPE)
+-    set(CMAKE_BUILD_TYPE Release)
+-endif()
+-
+-# Handle build type
+-if(CMAKE_BUILD_TYPE MATCHES [Dd]ebug)
+-    message(STATUS "Debug build")
+-    add_definitions(-DDEBUG)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+-else()
+-    message(STATUS "Release build")
+-    add_definitions(-DNDEBUG)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+-endif()
+-
+ # Default absolute paths
+ if(NOT DEFINED CMAKE_INSTALL_SYSCONFDIR)
+     set(CMAKE_INSTALL_SYSCONFDIR "/etc")
+-- 
+2.32.0
+

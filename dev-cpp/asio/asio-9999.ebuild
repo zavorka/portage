@@ -25,7 +25,7 @@ KEYWORDS="alpha amd64 ~arm ~hppa ia64 ppc ppc64 sparc x86"
 IUSE="doc examples libressl ssl test"
 
 RDEPEND="ssl? (
-	!libressl? ( >=dev-libs/openssl-1.0.2g:0=[-bindist] )
+	!libressl? ( >=dev-libs/openssl-1.0.2g:0= )
 	libressl? ( >=dev-libs/libressl-2.5.0 )
 )"
 DEPEND="${RDEPEND}"

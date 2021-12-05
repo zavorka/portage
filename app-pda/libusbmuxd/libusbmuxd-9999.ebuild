@@ -27,9 +27,11 @@ DEPEND="${RDEPEND}
 
 DOCS=( AUTHORS README.md )
 
-src_configure() {
-	local myeconfargs=( $(use_enable static-libs static) )
-	use kernel_linux || myeconfargs+=( --without-inotify )
+src_prepare() {
+	default
+	eautoreconf
+}
 
-	autotools-utils_src_configure
+src_configure() {
+	econf $(use_enable static-libs static)
 }

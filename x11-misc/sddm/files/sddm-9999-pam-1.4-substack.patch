@@ -1,0 +1,36 @@
+From ddca7a272933e4f4a91873951df299e503fb4ac0 Mon Sep 17 00:00:00 2001
+From: Roman Beranek <roman.beranek@prusa3d.com>
+Date: Tue, 17 Aug 2021 04:56:07 +0200
+Subject: [PATCH] pam-1.4 substack
+
+---
+ services/sddm.pam | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/services/sddm.pam b/services/sddm.pam
+index 343650e..d76ac65 100755
+--- a/services/sddm.pam
++++ b/services/sddm.pam
+@@ -1,15 +1,15 @@
+ #%PAM-1.0
+ 
+-auth		include		system-login
++auth		substack		system-login
+ -auth		optional	pam_gnome_keyring.so
+ -auth   optional  pam_kwallet5.so
+ 
+-account		include		system-login
++account		substack		system-login
+ 
+-password	include		system-login
++password	substack		system-login
+ -password	optional	pam_gnome_keyring.so use_authtok
+ 
+ session		optional	pam_keyinit.so force revoke
+-session		include		system-login
++session		substack		system-login
+ -session		optional	pam_gnome_keyring.so auto_start
+ -session  optional  pam_kwallet5.so auto_start
+-- 
+2.32.0
+

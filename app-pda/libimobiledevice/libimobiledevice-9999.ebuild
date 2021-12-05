@@ -27,6 +27,7 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
 RDEPEND="
 	>=app-pda/libplist-1.11
+	>=app-pda/libimobiledevice-glue-1.0.0:0=
 	>=app-pda/libusbmuxd-1.0.10
 	gnutls? (
 		dev-libs/libgcrypt:0

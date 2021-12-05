@@ -15,8 +15,8 @@ index 78475521d9..dc94115335 100644
  find_package( SWIG 3.0 REQUIRED )
  include( ${SWIG_USE_FILE} )
  
-+set( PythonInterp_FIND_VERSION 3.6 )
-+set( PythonLibs_FIND_VERSION 3.6 )
++set( PythonInterp_FIND_VERSION 3.8 )
++set( PythonLibs_FIND_VERSION 3.8 )
 +set( PythonLibsNew_FIND_VERSION ${PythonLibs_FIND_VERSION} )
 +
  # pybind11 is header-only, so include the subdir

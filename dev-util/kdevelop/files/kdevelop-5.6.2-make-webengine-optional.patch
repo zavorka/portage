@@ -1,0 +1,97 @@
+From 1916d62c7b7860f2ec8fd2228ab13823c8d3b789 Mon Sep 17 00:00:00 2001
+From: Root <root@gentoo.local>
+Date: Wed, 1 Dec 2021 03:05:44 +0100
+Subject: [PATCH] make qtwebengine optional
+
+---
+ kdevplatform/documentation/CMakeLists.txt     |  7 ++--
+ .../standarddocumentationview.cpp             | 32 ++++++++++++++++++-
+ 2 files changed, 35 insertions(+), 4 deletions(-)
+
+diff --git a/kdevplatform/documentation/CMakeLists.txt b/kdevplatform/documentation/CMakeLists.txt
+index b371c36..8511276 100644
+--- a/kdevplatform/documentation/CMakeLists.txt
++++ b/kdevplatform/documentation/CMakeLists.txt
+@@ -1,13 +1,14 @@
+ add_definitions(-DTRANSLATION_DOMAIN=\"kdevplatform\")
+ 
+ find_package(Qt5WebEngineWidgets CONFIG)
++find_package(Qt5WebKitWidgets CONFIG)
+ if(TARGET Qt5::WebEngineWidgets)
+     set_package_properties(Qt5WebEngineWidgets PROPERTIES
+         PURPOSE "QtWebEngine, for integrated documentation"
+         URL "https://qt.io/"
+         TYPE REQUIRED)
+-else()
+-    find_package(Qt5WebKitWidgets CONFIG)
++    set(USE_QTWEBENGINE 1)
++elseif(TARGET Qt5::WebKitWidgets)
+     set_package_properties(Qt5WebKitWidgets PROPERTIES
+         PURPOSE "QtWebKit, for integrated documentation"
+         URL "https://qt.io/"
+@@ -39,7 +40,7 @@ PRIVATE
+ if(USE_QTWEBKIT)
+     target_link_libraries(KDevPlatformDocumentation PRIVATE Qt5::WebKitWidgets)
+     target_compile_definitions(KDevPlatformDocumentation PUBLIC -DUSE_QTWEBKIT)
+-else()
++elseif(USE_QTWEBENGINE)
+     target_link_libraries(KDevPlatformDocumentation PRIVATE Qt5::WebEngineWidgets)
+ endif()
+ 
+diff --git a/kdevplatform/documentation/standarddocumentationview.cpp b/kdevplatform/documentation/standarddocumentationview.cpp
+index af146b8..5b2ae83 100644
+--- a/kdevplatform/documentation/standarddocumentationview.cpp
++++ b/kdevplatform/documentation/standarddocumentationview.cpp
+@@ -38,7 +38,7 @@
+ #include <QWebView>
+ #include <QWebFrame>
+ #include <QWebSettings>
+-#else
++#elif defined(USE_QTWEBENGINE)
+ #include <QNetworkRequest>
+ #include <QNetworkReply>
+ #include <QWebEngineView>
+@@ -51,6 +51,7 @@
+ 
+ using namespace KDevelop;
+ 
++#if defined(USE_QTWEBKIT) || defined(USE_QTWEBENGINE)
+ #ifndef USE_QTWEBKIT
+ class StandardDocumentationPage : public QWebEnginePage
+ {
+@@ -485,3 +486,32 @@ void StandardDocumentationView::keyReleaseEvent(QKeyEvent* event)
+ #ifndef USE_QTWEBKIT
+ #include "standarddocumentationview.moc"
+ #endif
++
++#else
++
++class KDevelop::StandardDocumentationViewPrivate
++{
++public:
++    void init(StandardDocumentationView* parent) {}
++};
++
++StandardDocumentationView::StandardDocumentationView(DocumentationFindWidget* findWidget, QWidget* parent) {}
++StandardDocumentationView::~StandardDocumentationView() {}
++void StandardDocumentationView::search ( const QString& text, DocumentationFindWidget::FindOptions options ) {}
++void StandardDocumentationView::searchIncremental(const QString& text, DocumentationFindWidget::FindOptions options) {}
++void StandardDocumentationView::finishSearch() {}
++void StandardDocumentationView::initZoom(const QString& configSubGroup) {}
++void StandardDocumentationView::setDocumentation(const IDocumentation::Ptr& doc) {}
++void StandardDocumentationView::update() {}
++void KDevelop::StandardDocumentationView::setOverrideCss(const QUrl& url) {}
++void KDevelop::StandardDocumentationView::load(const QUrl& url) {}
++void KDevelop::StandardDocumentationView::setHtml(const QString& html) {}
++void KDevelop::StandardDocumentationView::setNetworkAccessManager(QNetworkAccessManager* manager) {}
++void KDevelop::StandardDocumentationView::setDelegateLinks(bool delegate) {}
++QMenu* StandardDocumentationView::createStandardContextMenu() { return nullptr; }
++bool StandardDocumentationView::eventFilter(QObject* object, QEvent* event) { return false; }
++void StandardDocumentationView::contextMenuEvent(QContextMenuEvent* event) {}
++void StandardDocumentationView::updateZoomFactor(double zoomFactor) {}
++void StandardDocumentationView::keyReleaseEvent(QKeyEvent* event) {}
++
++#endif
+-- 
+2.34.1
+
