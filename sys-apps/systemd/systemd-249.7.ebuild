@@ -1,7 +1,10 @@
 # Copyright 2011-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
-
 EAPI=7
+PYTHON_COMPAT=( python3_{8..10} )
+
+# Avoid QA warnings
+TMPFILES_OPTIONAL=1
 
 if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://github.com/systemd/systemd.git"
@@ -16,24 +19,27 @@ else
 	MY_P=${MY_PN}-${MY_PV}
 	S=${WORKDIR}/${MY_P}
 	SRC_URI="https://github.com/systemd/${MY_PN}/archive/v${MY_PV}/${MY_P}.tar.gz"
-	KEYWORDS=""
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~riscv ~sparc ~x86"
 fi
+MUSL_PATCHSET="${PV}"
+SRC_URI="${SRC_URI}
+	elibc_musl? ( http://192.168.24.52/localhost/htdocs/systemd-musl-patches-${MUSL_PATCHSET}.tar.xz )
+"
 
-PYTHON_COMPAT=( python3_{7..9} )
-
-inherit bash-completion-r1 linux-info meson-multilib pam python-any-r1 systemd toolchain-funcs udev usr-ldscript
+inherit bash-completion-r1 flag-o-matic linux-info meson-multilib pam python-any-r1 systemd toolchain-funcs udev usr-ldscript
 
 DESCRIPTION="System and service manager for Linux"
 HOMEPAGE="https://www.freedesktop.org/wiki/Software/systemd"
 
 LICENSE="GPL-2 LGPL-2.1 MIT public-domain"
 SLOT="0/2"
-IUSE="acl apparmor audit build cgroup-hybrid cryptsetup curl dns-over-tls elfutils +gcrypt gnuefi homed http +hwdb idn importd +kmod +lz4 lzma nat pam pcre pkcs11 policykit pwquality qrcode repart +resolvconf +seccomp selinux split-usr static-libs +sysv-utils test tpm vanilla xkb +zstd"
+IUSE="acl apparmor audit build cgroup-hybrid cryptsetup curl dns-over-tls elfutils +gcrypt gnuefi homed http +hwdb idn importd +kmod +lz4 lzma musl nat pam pcre pkcs11 policykit pwquality qrcode repart +resolvconf +seccomp selinux split-usr static-libs +sysv-utils test tpm vanilla xkb +zstd"
 
 REQUIRED_USE="
 	homed? ( cryptsetup pam )
 	importd? ( curl gcrypt lzma )
 	pwquality? ( homed )
+	elibc_musl? ( !idn )
 "
 RESTRICT="!test? ( test )"
 
@@ -91,7 +97,6 @@ RDEPEND="${COMMON_DEPEND}
 	>=acct-group/wheel-0-r1
 	>=acct-group/kmem-0-r1
 	>=acct-group/tty-0-r1
-	>=acct-group/utmp-0-r1
 	>=acct-group/audio-0-r1
 	>=acct-group/cdrom-0-r1
 	>=acct-group/dialout-0-r1
@@ -114,6 +119,7 @@ RDEPEND="${COMMON_DEPEND}
 	>=acct-user/systemd-resolve-0-r1
 	>=acct-user/systemd-timesync-0-r1
 	>=sys-apps/baselayout-2.2
+	!elibc_musl? ( >=acct-group/utmp-0-r1 )
 	selinux? ( sec-policy/selinux-base-policy[systemd] )
 	sysv-utils? (
 		!sys-apps/openrc[sysv-utils(-)]
@@ -214,34 +220,27 @@ src_prepare() {
 	# Do NOT add patches here
 	local PATCHES=()
 
+	# musl patchset from:
+	# http://cgit.openembedded.org/openembedded-core/tree/meta/recipes-core/systemd/systemd
+	# check SRC_URI_MUSL in systemd_${PV}.bb file for exact list of musl patches
+	# we share patch tarball with sys-fs/udev
+	if use elibc_musl; then
+		einfo "applying musl patches and workarounds"
+		eapply "${WORKDIR}/musl-patches"
+
+		# avoids re-definition of struct ethhdr, also 0006-Include-netinet-if_ether.h.patch
+		append-cppflags '-D__UAPI_DEF_ETHHDR=0'
+
+		# src/basic/rlimit-util.c:46:19: error: format ‘%lu’ expects argument of type ‘long unsigned int’,
+		# but argument 9 has type ‘rlim_t’ {aka ‘long long unsigned int’}
+		# not a nice workaround, but it comes from debug messages and we don't really use this component.
+		append-cflags '-Wno-error=format'
+	fi
+
 	[[ -d "${WORKDIR}"/patches ]] && PATCHES+=( "${WORKDIR}"/patches )
 
 	# Add local patches here
 	PATCHES+=(
-		"${FILESDIR}/0002-don-t-use-glibc-specific-qsort_r.patch"
-		"${FILESDIR}/0003-missing_type.h-add-__compare_fn_t-and-comparison_fn_.patch"
-		"${FILESDIR}/0004-add-fallback-parse_printf_format-implementation.patch"
-		"${FILESDIR}/0005-src-basic-missing.h-check-for-missing-strndupa.patch"
-		"${FILESDIR}/0006-Include-netinet-if_ether.h.patch"
-		"${FILESDIR}/0007-don-t-fail-if-GLOB_BRACE-and-GLOB_ALTDIRFUNC-is-not-.patch"
-		"${FILESDIR}/0008-add-missing-FTW_-macros-for-musl.patch"
-		"${FILESDIR}/0009-fix-missing-of-__register_atfork-for-non-glibc-build.patch"
-		"${FILESDIR}/0010-Use-uintmax_t-for-handling-rlim_t.patch"
-		"${FILESDIR}/0011-test-sizeof.c-Disable-tests-for-missing-typedefs-in-.patch"
-		"${FILESDIR}/0012-don-t-pass-AT_SYMLINK_NOFOLLOW-flag-to-faccessat.patch"
-		"${FILESDIR}/0013-Define-glibc-compatible-basename-for-non-glibc-syste.patch"
-		"${FILESDIR}/0014-Do-not-disable-buffering-when-writing-to-oom_score_a.patch"
-		"${FILESDIR}/0015-distinguish-XSI-compliant-strerror_r-from-GNU-specif.patch"
-		"${FILESDIR}/0016-Hide-__start_BUS_ERROR_MAP-and-__stop_BUS_ERROR_MAP.patch"
-		"${FILESDIR}/0017-missing_type.h-add-__compar_d_fn_t-definition.patch"
-		"${FILESDIR}/0018-avoid-redefinition-of-prctl_mm_map-structure.patch"
-		"${FILESDIR}/0019-Handle-missing-LOCK_EX.patch"
-		"${FILESDIR}/0020-Fix-incompatible-pointer-type-struct-sockaddr_un.patch"
-		"${FILESDIR}/0021-test-json.c-define-M_PIl.patch"
-		"${FILESDIR}/0022-do-not-disable-buffer-in-writing-files.patch"
-		"${FILESDIR}/0025-Handle-__cpu_mask-usage.patch"
-		"${FILESDIR}/0026-Handle-missing-gshadow.patch"
-		"${FILESDIR}/0028-missing_syscall.h-Define-MIPS-ABI-defines-for-musl.patch"
 	)
 
 	if ! use vanilla; then
@@ -281,14 +280,14 @@ multilib_src_configure() {
 		# no deps
 		-Dima=true
 		-Ddefault-hierarchy=$(usex cgroup-hybrid hybrid unified)
-		-Dgshadow=false
-		-Dlocaled=false
-		-Dnss-myhostname=false
-		-Dnss-systemd=false
-		-Dnss-resolve=false
-		-Dsysusers=false
-		-Duserdb=false
-		-Dutmp=false
+		$(meson_use !elibc_musl gshadow)
+		$(meson_use !elibc_musl localed)
+		$(meson_use !elibc_musl nss-myhostname)
+		$(meson_use !elibc_musl nss-resolve)
+		$(meson_use !elibc_musl nss-systemd)
+		$(meson_use !elibc_musl sysusers)
+		$(meson_use !elibc_musl userdb)
+		$(meson_use !elibc_musl utmp)
 		# Optional components/dependencies
 		$(meson_native_use_bool acl)
 		$(meson_native_use_bool apparmor)
@@ -372,7 +371,9 @@ multilib_src_install_all() {
 	mv "${ED}"/usr/share/doc/{systemd,${PF}} || die
 
 	einstalldocs
-	dodoc "${FILESDIR}"/nsswitch.conf
+	if ! use elibc_musl; then
+		dodoc "${FILESDIR}"/nsswitch.conf
+	fi
 
 	if ! use resolvconf; then
 		rm -f "${ED}${rootprefix}"/sbin/resolvconf || die
